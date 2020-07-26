@@ -36,6 +36,16 @@ namespace SilverFir
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center
                 }
+            },
+            {
+                "Clear", new Button
+                {
+                    Width = 120,
+                    Height = 30,
+                    Content = "Clear",
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                }
             }
         };
 
@@ -43,6 +53,10 @@ namespace SilverFir
         {
             InitializeComponent();
             CommonWindow.Children.Clear();
+
+            CommonWindow.Children.Add(ResultBox);
+            CommonWindow.Children.Add(FindButton);
+
             CreateButtons();
         }
 
@@ -50,23 +64,42 @@ namespace SilverFir
         {
             //GridButtons.Children.Clear();
 
-            if (sender is Button senderButton)
+            if (sender is Button senderButton && ResultBox.FindName("OutputBox") is TextBox result)
             {
-                MoexSearchBonds();
+                switch (senderButton.Content.ToString())
+                {
+                    case "Get bonds":
+                        var bonds = MoexSearchBonds();
+
+                        result.Text = bonds != null ? string.Join("\n", bonds.Select(x => x.BondName)) : "Нет облигаций для выбранных параметров";
+
+                        break;
+
+                    case "Clear":
+                        result.Text = string.Empty;
+
+                        break;
+                }
             }
         }
 
         private void CreateButtons()
         {
-            CommonWindow.Children.Add(GridButtons);
-
             var buttons = _buttons;
 
             buttons.TryGetValue("Get bonds", out var getBonds);
-            Grid.SetRow(getBonds ?? throw new InvalidOperationException(), 1);
-            Grid.SetColumn(getBonds, 0);
+            Grid.SetColumnSpan(getBonds ?? throw new InvalidOperationException(), 2);
+            Grid.SetRow(getBonds, 5);
+            Grid.SetColumn(getBonds, 1);
             getBonds.Click += ButtonClick;
-            GridButtons.Children.Add(getBonds);
+            FindButton.Children.Add(getBonds);
+
+            buttons.TryGetValue("Clear", out var clearWindow);
+            Grid.SetColumnSpan(clearWindow ?? throw new InvalidOperationException(), 2);
+            Grid.SetRow(clearWindow, 5);
+            Grid.SetColumn(clearWindow, 3);
+            clearWindow.Click += ButtonClick;
+            FindButton.Children.Add(clearWindow);
         }
 
         /// <summary>
@@ -87,7 +120,7 @@ namespace SilverFir
         /// <summary>
         ///     Поиск облигаций по параметрам
         /// </summary>
-        private void MoexSearchBonds()
+        private IEnumerable<BondsResult> MoexSearchBonds()
         {
             var result = new List<BondsResult>();
 
@@ -143,9 +176,7 @@ namespace SilverFir
                 }
             }
 
-            if (result.Count == 0)
-            {
-            }
+            return result.Count == 0 ? null : result;
         }
 
         /// <summary>
