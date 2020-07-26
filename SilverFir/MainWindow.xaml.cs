@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -60,7 +61,7 @@ namespace SilverFir
             CreateButtons();
         }
 
-        private void ButtonClick(object sender, RoutedEventArgs e)
+        private async void ButtonClickAsync(object sender, RoutedEventArgs e)
         {
             //GridButtons.Children.Clear();
 
@@ -69,7 +70,7 @@ namespace SilverFir
                 switch (senderButton.Content.ToString())
                 {
                     case "Get bonds":
-                        var bonds = MoexSearchBonds();
+                        var bonds = await MoexSearchBonds();
 
                         result.Text = bonds != null ? string.Join("\n", bonds.Select(x => x.BondName)) : "Нет облигаций для выбранных параметров";
 
@@ -91,14 +92,14 @@ namespace SilverFir
             Grid.SetColumnSpan(getBonds ?? throw new InvalidOperationException(), 2);
             Grid.SetRow(getBonds, 5);
             Grid.SetColumn(getBonds, 1);
-            getBonds.Click += ButtonClick;
+            getBonds.Click += ButtonClickAsync;
             FindButton.Children.Add(getBonds);
 
             buttons.TryGetValue("Clear", out var clearWindow);
             Grid.SetColumnSpan(clearWindow ?? throw new InvalidOperationException(), 2);
             Grid.SetRow(clearWindow, 5);
             Grid.SetColumn(clearWindow, 3);
-            clearWindow.Click += ButtonClick;
+            clearWindow.Click += ButtonClickAsync;
             FindButton.Children.Add(clearWindow);
         }
 
@@ -120,63 +121,68 @@ namespace SilverFir
         /// <summary>
         ///     Поиск облигаций по параметрам
         /// </summary>
-        private IEnumerable<BondsResult> MoexSearchBonds()
+        private Task<List<BondsResult>> MoexSearchBonds()
         {
-            var result = new List<BondsResult>();
-
-            var boardgroups = new List<int>
+            var task = Task.Run(() =>
             {
-                7, //Т0: Основной режим - безадрес.
-                58, //Т+: Основной режим - безадрес.
-                193 //Т+: Основной режим (USD) - безадрес.
-            };
+                var result = new List<BondsResult>();
 
-            foreach (var boardgroup in boardgroups)
-            {
-                var url = $"https://iss.moex.com/iss/engines/stock/markets/bonds/boardgroups/{boardgroup}/securities.json?iss.dp=comma&iss.meta=off&iss.only=securities,marketdata&securities.columns=SECID,SECNAME,PREVLEGALCLOSEPRICE&marketdata.columns=SECID,YIELD,DURATION";
-
-                using (var client = new WebClient())
+                var boardgroups = new List<int>
                 {
-                    var resultBoardGroup = JsonConvert.DeserializeObject<BoardGroups>(client.DownloadString(url).Replace("\\\"", ""));
+                    7, //Т0: Основной режим - безадрес.
+                    58, //Т+: Основной режим - безадрес.
+                    193 //Т+: Основной режим (USD) - безадрес.
+                };
 
-                    for (var data = 0; data < resultBoardGroup.Securities.Data.Count; data++)
+                foreach (var boardgroup in boardgroups)
+                {
+                    var url = $"https://iss.moex.com/iss/engines/stock/markets/bonds/boardgroups/{boardgroup}/securities.json?iss.dp=comma&iss.meta=off&iss.only=securities,marketdata&securities.columns=SECID,SECNAME,PREVLEGALCLOSEPRICE&marketdata.columns=SECID,YIELD,DURATION";
+
+                    using (var client = new WebClient())
                     {
-                        var bondName = resultBoardGroup.Securities.Data[data][1]?.ToString() ?? string.Empty;
-                        var secId = resultBoardGroup.Securities.Data[data][0]?.ToString() ?? string.Empty;
-                        var bondPrice = Convert.ToDecimal(resultBoardGroup.Securities.Data[data][2] ?? 0);
-                        var bondYield = Convert.ToDecimal(resultBoardGroup.MarketData.Data[data][1] ?? 0);
-                        var bondDuration = Math.Floor(Convert.ToDecimal(resultBoardGroup.MarketData.Data[data][2] ?? 0) / 30 * 100) / 100; // Количество оставшихся месяцев
+                        var resultBoardGroup = JsonConvert.DeserializeObject<BoardGroups>(client.DownloadString(url).Replace("\\\"", ""));
 
-                        if (bondYield > YieldMore &&
-                            bondYield < YieldLess && //условия выборки
-                            bondPrice > PriceMore &&
-                            bondPrice < PriceLess &&
-                            bondDuration > DurationMore &&
-                            bondDuration < DurationLess)
+                        for (var data = 0; data < resultBoardGroup.Securities.Data.Count; data++)
                         {
-                            var bondVolume = MoexSearchVolume(secId);
+                            var bondName = resultBoardGroup.Securities.Data[data][1]?.ToString() ?? string.Empty;
+                            var secId = resultBoardGroup.Securities.Data[data][0]?.ToString() ?? string.Empty;
+                            var bondPrice = Convert.ToDecimal(resultBoardGroup.Securities.Data[data][2] ?? 0);
+                            var bondYield = Convert.ToDecimal(resultBoardGroup.MarketData.Data[data][1] ?? 0);
+                            var bondDuration = Math.Floor(Convert.ToDecimal(resultBoardGroup.MarketData.Data[data][2] ?? 0) / 30 * 100) / 100; // Количество оставшихся месяцев
 
-                            if (bondVolume > VolumeMore) //если оборот в бумагах больше этой цифры
+                            if (bondYield > YieldMore &&
+                                bondYield < YieldLess && //условия выборки
+                                bondPrice > PriceMore &&
+                                bondPrice < PriceLess &&
+                                bondDuration > DurationMore &&
+                                bondDuration < DurationLess)
                             {
-                                var bondTax = MoexSearchTax(secId);
+                                var bondVolume = MoexSearchVolume(secId);
 
-                                result.Add(new BondsResult
+                                if (bondVolume > VolumeMore) //если оборот в бумагах больше этой цифры
                                 {
-                                    BondName = bondName,
-                                    SecId = secId,
-                                    BondPrice = bondPrice,
-                                    BondVolume = bondVolume,
-                                    BondYield = bondYield,
-                                    BondDuration = bondDuration,
-                                    BondTax = bondTax
-                                });
+                                    var bondTax = MoexSearchTax(secId);
+
+                                    result.Add(new BondsResult
+                                    {
+                                        BondName = bondName,
+                                        SecId = secId,
+                                        BondPrice = bondPrice,
+                                        BondVolume = bondVolume,
+                                        BondYield = bondYield,
+                                        BondDuration = bondDuration,
+                                        BondTax = bondTax
+                                    });
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            return result.Count == 0 ? null : result;
+                return result.Count == 0 ? null : result;
+            });
+
+            return task;
         }
 
         /// <summary>
