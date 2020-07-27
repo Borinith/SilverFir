@@ -1,31 +1,18 @@
-﻿using Newtonsoft.Json;
-using SilverFir.MoexClasses;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using Xceed.Wpf.Toolkit;
 
 namespace SilverFir
 {
     /// <summary>
     ///     Interaction logic for MainWindow.xaml
     /// </summary>
-    [SuppressMessage("ReSharper", "ConvertToUsingDeclaration")]
     public partial class MainWindow
     {
-        private const decimal YieldMore = 7; //Доходность больше этой цифры
-        private const decimal YieldLess = 14; //Доходность меньше этой цифры
-        private const decimal PriceMore = 95; //Цена больше этой цифры
-        private const decimal PriceLess = 101; //Цена меньше этой цифры
-        private const decimal DurationMore = 1; //Дюрация больше этой цифры
-        private const decimal DurationLess = 6; //Дюрация меньше этой цифры
-        private const decimal VolumeMore = 5000; //Объем сделок за n дней, шт. больше этой цифры
-        private static readonly string Conditions = $"<li>${YieldMore}% < Доходность < ${YieldLess}%</li><li>${PriceMore}% < Цена < ${PriceLess}%</li><li>${DurationMore} мес. < Дюрация < ${DurationLess} мес.</li><li>Объем сделок за n дней > ${VolumeMore} шт.</li><li>Поиск в Т0, Т+, Т+ (USD) - Основной режим - безадрес.</li>";
-
         private readonly Dictionary<string, Button> _buttons = new Dictionary<string, Button>
         {
             {
@@ -54,10 +41,8 @@ namespace SilverFir
         {
             InitializeComponent();
             CommonWindow.Children.Clear();
-
             CommonWindow.Children.Add(ResultBox);
-            CommonWindow.Children.Add(FindButton);
-
+            SearchParameters(new InputParameters(), true);
             CreateButtons();
         }
 
@@ -65,14 +50,48 @@ namespace SilverFir
         {
             //GridButtons.Children.Clear();
 
+            var newInputParameters = NewInputParameters();
+
             if (sender is Button senderButton && ResultBox.FindName("OutputBox") is TextBox result)
             {
                 switch (senderButton.Content.ToString())
                 {
                     case "Get bonds":
-                        var bonds = await MoexSearchBonds();
+                        SearchParameters(newInputParameters, false);
+                        var errors = new List<string>();
 
-                        result.Text = bonds != null ? string.Join("\n", bonds.Select(x => x.BondName)) : "Нет облигаций для выбранных параметров";
+                        if (newInputParameters.YieldMore > newInputParameters.YieldLess)
+                        {
+                            errors.Add("Неверные значения доходности");
+                        }
+
+                        if (newInputParameters.PriceMore > newInputParameters.PriceLess)
+                        {
+                            errors.Add("Неверные значения цены");
+                        }
+
+                        if (newInputParameters.DurationMore > newInputParameters.DurationLess)
+                        {
+                            errors.Add("Неверные значения дюрации");
+                        }
+
+                        if (errors.Count == 0)
+                        {
+                            try
+                            {
+                                var bonds = await SearchBonds.MoexSearchBonds(newInputParameters);
+
+                                result.Text = bonds != null ? string.Join("\n", bonds.Select(x => x.BondName)) : "Нет облигаций для выбранных параметров";
+                            }
+                            catch (Exception)
+                            {
+                                result.Text = "Ошибка подключения";
+                            }
+                        }
+                        else
+                        {
+                            result.Text = string.Join("\n", errors);
+                        }
 
                         break;
 
@@ -81,6 +100,8 @@ namespace SilverFir
 
                         break;
                 }
+
+                SearchParameters(newInputParameters, true);
             }
         }
 
@@ -90,147 +111,147 @@ namespace SilverFir
 
             buttons.TryGetValue("Get bonds", out var getBonds);
             Grid.SetColumnSpan(getBonds ?? throw new InvalidOperationException(), 2);
-            Grid.SetRow(getBonds, 5);
-            Grid.SetColumn(getBonds, 1);
+            Grid.SetRow(getBonds, 6);
+            Grid.SetColumn(getBonds, 2);
             getBonds.Click += ButtonClickAsync;
-            FindButton.Children.Add(getBonds);
+            ResultBox.Children.Add(getBonds);
 
             buttons.TryGetValue("Clear", out var clearWindow);
             Grid.SetColumnSpan(clearWindow ?? throw new InvalidOperationException(), 2);
-            Grid.SetRow(clearWindow, 5);
-            Grid.SetColumn(clearWindow, 3);
+            Grid.SetRow(clearWindow, 6);
+            Grid.SetColumn(clearWindow, 4);
             clearWindow.Click += ButtonClickAsync;
-            FindButton.Children.Add(clearWindow);
+            ResultBox.Children.Add(clearWindow);
         }
 
-        /// <summary>
-        ///     Узнаем boardId любой бумаги по тикеру
-        /// </summary>
-        private string MoexBoardId(string secId)
+        private InputParameters NewInputParameters()
         {
-            var url = $"https://iss.moex.com/iss/securities/{secId}.json?iss.meta=off&iss.only=boards&boards.columns=secid,boardid,is_primary";
+            var inputParameters = new InputParameters();
 
-            using (var client = new WebClient())
-            {
-                var board = JsonConvert.DeserializeObject<MoexBoards>(client.DownloadString(url));
+            #region Доходность
 
-                return board.Boards.Data.Where(x => x[2]?.ToString() == "1").Select(x => x[1]).FirstOrDefault()?.ToString();
-            }
+            int.TryParse((ResultBox.FindName("YieldMoreValue") as IntegerUpDown)?.Text, NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out var yieldMoreValue);
+
+            inputParameters.YieldMore = yieldMoreValue;
+
+            int.TryParse((ResultBox.FindName("YieldLessValue") as IntegerUpDown)?.Text, NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out var yieldLessValue);
+
+            inputParameters.YieldLess = yieldLessValue;
+
+            #endregion Доходность
+
+            #region Цена
+
+            int.TryParse((ResultBox.FindName("PriceMoreValue") as IntegerUpDown)?.Text, NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out var priceMoreValue);
+
+            inputParameters.PriceMore = priceMoreValue;
+
+            int.TryParse((ResultBox.FindName("PriceLessValue") as IntegerUpDown)?.Text, NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out var priceLessValue);
+
+            inputParameters.PriceLess = priceLessValue;
+
+            #endregion Цена
+
+            #region Дюрация
+
+            int.TryParse((ResultBox.FindName("DurationMoreValue") as IntegerUpDown)?.Text, NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out var durationMoreValue);
+
+            inputParameters.DurationMore = durationMoreValue;
+
+            int.TryParse((ResultBox.FindName("DurationLessValue") as IntegerUpDown)?.Text, NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out var durationLessValue);
+
+            inputParameters.DurationLess = durationLessValue;
+
+            #endregion Дюрация
+
+            #region n дней
+
+            int.TryParse((ResultBox.FindName("PreviousDaysCountValue") as IntegerUpDown)?.Text, NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out var previousDaysCountValue);
+
+            inputParameters.PreviousDaysCount = previousDaysCountValue;
+
+            int.TryParse((ResultBox.FindName("VolumeMoreValue") as IntegerUpDown)?.Text, NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out var volumeMoreValue);
+
+            inputParameters.VolumeMore = volumeMoreValue;
+
+            #endregion n дней
+
+            return inputParameters;
         }
 
-        /// <summary>
-        ///     Поиск облигаций по параметрам
-        /// </summary>
-        private Task<List<BondsResult>> MoexSearchBonds()
+        private void SearchParameters(InputParameters inputParameters, bool isEnabled)
         {
-            var task = Task.Run(() =>
+            #region Доходность
+
+            if (ResultBox.FindName("YieldMoreValue") is IntegerUpDown yieldMoreValue)
             {
-                var result = new List<BondsResult>();
-
-                var boardgroups = new List<int>
-                {
-                    7, //Т0: Основной режим - безадрес.
-                    58, //Т+: Основной режим - безадрес.
-                    193 //Т+: Основной режим (USD) - безадрес.
-                };
-
-                foreach (var boardgroup in boardgroups)
-                {
-                    var url = $"https://iss.moex.com/iss/engines/stock/markets/bonds/boardgroups/{boardgroup}/securities.json?iss.dp=comma&iss.meta=off&iss.only=securities,marketdata&securities.columns=SECID,SECNAME,PREVLEGALCLOSEPRICE&marketdata.columns=SECID,YIELD,DURATION";
-
-                    using (var client = new WebClient())
-                    {
-                        var resultBoardGroup = JsonConvert.DeserializeObject<BoardGroups>(client.DownloadString(url).Replace("\\\"", ""));
-
-                        for (var data = 0; data < resultBoardGroup.Securities.Data.Count; data++)
-                        {
-                            var bondName = resultBoardGroup.Securities.Data[data][1]?.ToString() ?? string.Empty;
-                            var secId = resultBoardGroup.Securities.Data[data][0]?.ToString() ?? string.Empty;
-                            var bondPrice = Convert.ToDecimal(resultBoardGroup.Securities.Data[data][2] ?? 0);
-                            var bondYield = Convert.ToDecimal(resultBoardGroup.MarketData.Data[data][1] ?? 0);
-                            var bondDuration = Math.Floor(Convert.ToDecimal(resultBoardGroup.MarketData.Data[data][2] ?? 0) / 30 * 100) / 100; // Количество оставшихся месяцев
-
-                            if (bondYield > YieldMore &&
-                                bondYield < YieldLess && //условия выборки
-                                bondPrice > PriceMore &&
-                                bondPrice < PriceLess &&
-                                bondDuration > DurationMore &&
-                                bondDuration < DurationLess)
-                            {
-                                var bondVolume = MoexSearchVolume(secId);
-
-                                if (bondVolume > VolumeMore) //если оборот в бумагах больше этой цифры
-                                {
-                                    var bondTax = MoexSearchTax(secId);
-
-                                    result.Add(new BondsResult
-                                    {
-                                        BondName = bondName,
-                                        SecId = secId,
-                                        BondPrice = bondPrice,
-                                        BondVolume = bondVolume,
-                                        BondYield = bondYield,
-                                        BondDuration = bondDuration,
-                                        BondTax = bondTax
-                                    });
-                                }
-                            }
-                        }
-                    }
-                }
-
-                return result.Count == 0 ? null : result;
-            });
-
-            return task;
-        }
-
-        /// <summary>
-        ///     Налоговые льготы для корпоративных облигаций, выпущенных с 1 января 2017 года
-        /// </summary>
-        private bool MoexSearchTax(string secId)
-        {
-            var url = $"https://iss.moex.com/iss/securities/{secId}.json?iss.meta=off&iss.only=description";
-
-            using (var client = new WebClient())
-            {
-                var tax = JsonConvert.DeserializeObject<MoexTax>(client.DownloadString(url));
-
-                var startDateMoex = tax.Description.Data.Where(x => x[0]?.ToString() == "STARTDATEMOEX").Select(x => x[2]).FirstOrDefault()?.ToString();
-
-                if (DateTime.TryParse(startDateMoex, out var startDate))
-                {
-                    return startDate > new DateTime(2017, 1, 1);
-                }
-
-                return false;
-            }
-        }
-
-        /// <summary>
-        ///     Суммирование оборотов по корпоративной облигации за последние n дней
-        /// </summary>
-        private decimal MoexSearchVolume(string secId)
-        {
-            var now = DateTime.Now;
-            var datePrevious = now.AddDays(-15);
-            var datePreviousRequest = $"{datePrevious.Year}-{datePrevious.Month}-{datePrevious.Day}";
-
-            var boardId = MoexBoardId(secId);
-
-            if (boardId == null)
-            {
-                return 0;
+                yieldMoreValue.Text = inputParameters.YieldMore.ToString(CultureInfo.InvariantCulture);
+                yieldMoreValue.IsEnabled = isEnabled;
             }
 
-            var url = $"https://iss.moex.com/iss/history/engines/stock/markets/bonds/boards/{boardId}/securities/{secId}.json?iss.meta=off&iss.only=history&history.columns=SECID,TRADEDATE,VOLUME,NUMTRADES&limit=20&from={datePreviousRequest}";
-
-            using (var client = new WebClient())
+            if (ResultBox.FindName("YieldLessValue") is IntegerUpDown yieldLessValue)
             {
-                var history = JsonConvert.DeserializeObject<MoexHistory>(client.DownloadString(url));
-
-                return history.History.Data.Sum(x => Convert.ToDecimal(x[2]));
+                yieldLessValue.Text = inputParameters.YieldLess.ToString(CultureInfo.InvariantCulture);
+                yieldLessValue.IsEnabled = isEnabled;
             }
+
+            #endregion Доходность
+
+            #region Цена
+
+            if (ResultBox.FindName("PriceMoreValue") is IntegerUpDown priceMoreValue)
+            {
+                priceMoreValue.Text = inputParameters.PriceMore.ToString(CultureInfo.InvariantCulture);
+                priceMoreValue.IsEnabled = isEnabled;
+            }
+
+            if (ResultBox.FindName("PriceLessValue") is IntegerUpDown priceLessValue)
+            {
+                priceLessValue.Text = inputParameters.PriceLess.ToString(CultureInfo.InvariantCulture);
+                priceLessValue.IsEnabled = isEnabled;
+            }
+
+            #endregion Цена
+
+            #region Дюрация
+
+            if (ResultBox.FindName("DurationMoreValue") is IntegerUpDown durationMoreValue)
+            {
+                durationMoreValue.Text = inputParameters.DurationMore.ToString(CultureInfo.InvariantCulture);
+                durationMoreValue.IsEnabled = isEnabled;
+            }
+
+            if (ResultBox.FindName("DurationLessValue") is IntegerUpDown durationLessValue)
+            {
+                durationLessValue.Text = inputParameters.DurationLess.ToString(CultureInfo.InvariantCulture);
+                durationLessValue.IsEnabled = isEnabled;
+            }
+
+            #endregion Дюрация
+
+            #region n дней
+
+            if (ResultBox.FindName("PreviousDaysCountValue") is IntegerUpDown previousDaysCountValue)
+            {
+                previousDaysCountValue.Text = inputParameters.PreviousDaysCount.ToString(CultureInfo.InvariantCulture);
+                previousDaysCountValue.IsEnabled = isEnabled;
+            }
+
+            if (ResultBox.FindName("VolumeMoreValue") is IntegerUpDown volumeMoreValue)
+            {
+                volumeMoreValue.Text = inputParameters.VolumeMore.ToString(CultureInfo.InvariantCulture);
+                volumeMoreValue.IsEnabled = isEnabled;
+            }
+
+            #endregion n дней
         }
     }
 }

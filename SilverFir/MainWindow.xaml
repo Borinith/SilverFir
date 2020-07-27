@@ -3,13 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="SilverFir" Height="400" Width="600">
+        Title="SilverFir" Height="500" Width="700">
     <Grid x:Name="CommonWindow">
         <Grid x:Name="ResultBox">
-            <TextBox x:Name="OutputBox" IsReadOnly="True" Margin="75,60,75,60" />
-        </Grid>
-        <Grid x:Name="FindButton">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
@@ -17,7 +15,10 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
+
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
@@ -25,7 +26,144 @@
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
+
+            <TextBox x:Name="OutputBox"
+                     IsReadOnly="True"
+                     VerticalScrollBarVisibility="Auto"
+                     Grid.ColumnSpan="6"
+                     Grid.RowSpan="4"
+                     Grid.Column="1"
+                     Grid.Row="2" />
+
+            <Label Content="Доходность&#x0a;больше, чем:"
+                   Name="YieldMore"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Center"
+                   Grid.Row="0"
+                   Grid.Column="0" />
+
+            <xctk:IntegerUpDown Name="YieldMoreValue"
+                                Width="60"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Increment="1"
+                                Minimum="0"
+                                Grid.Row="0"
+                                Grid.Column="1" />
+
+            <Label Content="Доходность&#x0a;меньше, чем:"
+                   Name="YieldLess"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Center"
+                   Grid.Row="0"
+                   Grid.Column="2" />
+
+            <xctk:IntegerUpDown Name="YieldLessValue"
+                                Width="60"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Increment="1"
+                                Minimum="0"
+                                Grid.Row="0"
+                                Grid.Column="3" />
+
+            <Label Content="Цена&#x0a;больше, чем:"
+                   Name="PriceMore"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Center"
+                   Grid.Row="0"
+                   Grid.Column="4" />
+
+            <xctk:IntegerUpDown Name="PriceMoreValue"
+                                Width="60"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Increment="1"
+                                Minimum="0"
+                                Grid.Row="0"
+                                Grid.Column="5" />
+
+            <Label Content="Цена&#x0a;меньше, чем:"
+                   Name="PriceLess"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Center"
+                   Grid.Row="0"
+                   Grid.Column="6" />
+
+            <xctk:IntegerUpDown Name="PriceLessValue"
+                                Width="60"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Increment="1"
+                                Minimum="0"
+                                Grid.Row="0"
+                                Grid.Column="7" />
+
+            <Label Content="Дюрация&#x0a;больше, чем:"
+                   Name="DurationMore"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Center"
+                   Grid.Row="1"
+                   Grid.Column="0" />
+
+            <xctk:IntegerUpDown Name="DurationMoreValue"
+                                Width="60"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Increment="1"
+                                Minimum="0"
+                                Grid.Row="1"
+                                Grid.Column="1" />
+
+            <Label Content="Дюрация&#x0a;меньше, чем:"
+                   Name="DurationLess"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Center"
+                   Grid.Row="1"
+                   Grid.Column="2" />
+
+            <xctk:IntegerUpDown Name="DurationLessValue"
+                                Width="60"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Increment="1"
+                                Minimum="0"
+                                Grid.Row="1"
+                                Grid.Column="3" />
+
+            <Label Content="Поиск за&#x0a;последние n&#x0a;дней:"
+                   Name="PreviousDaysCount"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Center"
+                   Grid.Row="1"
+                   Grid.Column="4" />
+
+            <xctk:IntegerUpDown Name="PreviousDaysCountValue"
+                                Width="60"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Increment="1"
+                                Minimum="0"
+                                Grid.Row="1"
+                                Grid.Column="5" />
+
+            <Label Content="Объем&#x0a;сделок за n&#x0a;дней:"
+                   Name="VolumeMore"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Center"
+                   Grid.Row="1"
+                   Grid.Column="6" />
+
+            <xctk:IntegerUpDown Name="VolumeMoreValue"
+                                Width="60"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Increment="1"
+                                Minimum="0"
+                                Grid.Row="1"
+                                Grid.Column="7" />
         </Grid>
     </Grid>
 </Window>
