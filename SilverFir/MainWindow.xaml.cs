@@ -13,7 +13,7 @@ namespace SilverFir
     /// </summary>
     public partial class MainWindow
     {
-        private readonly Dictionary<string, Button> _buttons = new Dictionary<string, Button>
+        private readonly Dictionary<string, Button> _buttons = new()
         {
             {
                 "Get bonds", new Button
@@ -65,23 +65,30 @@ namespace SilverFir
                             errors.Add("Неверные значения доходности");
                         }
 
-                        if (newInputParameters.PriceMore > newInputParameters.PriceLess)
+                        if (newInputParameters.DaysToMaturityMore > newInputParameters.DaysToMaturityLess)
                         {
-                            errors.Add("Неверные значения цены");
+                            errors.Add("Неверные значения количества дней до погашения");
                         }
 
-                        if (newInputParameters.DurationMore > newInputParameters.DurationLess)
-                        {
-                            errors.Add("Неверные значения дюрации");
-                        }
-
-                        if (errors.Count == 0)
+                        if (!errors.Any())
                         {
                             try
                             {
                                 var bonds = await SearchBonds.MoexSearchBonds(newInputParameters);
 
-                                result.Text = bonds != null ? string.Join("\n", bonds.Select(x => x.BondName)) : "Нет облигаций для выбранных параметров";
+                                result.Text = bonds != null
+                                    ? string.Join("\n", bonds.Select(x => x.SecId +
+                                                                          "\t   " +
+                                                                          x.BondName +
+                                                                          "\t   " +
+                                                                          x.MaturityDate.ToString("dd.MM.yyyy") +
+                                                                          "\t   " +
+                                                                          x.BondYield +
+                                                                          "\t   " +
+                                                                          x.IssueVolume +
+                                                                          "\t   " +
+                                                                          x.BondTax))
+                                    : "Нет облигаций для выбранных параметров";
                             }
                             catch (Exception)
                             {
@@ -142,47 +149,28 @@ namespace SilverFir
 
             #endregion Доходность
 
-            #region Цена
+            #region Объём эмиссии
 
-            int.TryParse((ResultBox.FindName("PriceMoreValue") as IntegerUpDown)?.Text, NumberStyles.Integer,
-                CultureInfo.InvariantCulture, out var priceMoreValue);
+            int.TryParse((ResultBox.FindName("IssueVolumeMoreValue") as IntegerUpDown)?.Text, NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out var issueVolumeMoreValue);
 
-            inputParameters.PriceMore = priceMoreValue;
+            inputParameters.IssueVolumeMore = issueVolumeMoreValue;
 
-            int.TryParse((ResultBox.FindName("PriceLessValue") as IntegerUpDown)?.Text, NumberStyles.Integer,
-                CultureInfo.InvariantCulture, out var priceLessValue);
+            #endregion Объём эмиссии
 
-            inputParameters.PriceLess = priceLessValue;
+            #region Количество дней до погашения
 
-            #endregion Цена
+            int.TryParse((ResultBox.FindName("DaysToMaturityMoreValue") as IntegerUpDown)?.Text, NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out var daysToMaturityMoreValue);
 
-            #region Дюрация
+            inputParameters.DaysToMaturityMore = daysToMaturityMoreValue;
 
-            int.TryParse((ResultBox.FindName("DurationMoreValue") as IntegerUpDown)?.Text, NumberStyles.Integer,
-                CultureInfo.InvariantCulture, out var durationMoreValue);
+            int.TryParse((ResultBox.FindName("DaysToMaturityLessValue") as IntegerUpDown)?.Text, NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out var daysToMaturityLessValue);
 
-            inputParameters.DurationMore = durationMoreValue;
+            inputParameters.DaysToMaturityLess = daysToMaturityLessValue;
 
-            int.TryParse((ResultBox.FindName("DurationLessValue") as IntegerUpDown)?.Text, NumberStyles.Integer,
-                CultureInfo.InvariantCulture, out var durationLessValue);
-
-            inputParameters.DurationLess = durationLessValue;
-
-            #endregion Дюрация
-
-            #region n дней
-
-            int.TryParse((ResultBox.FindName("PreviousDaysCountValue") as IntegerUpDown)?.Text, NumberStyles.Integer,
-                CultureInfo.InvariantCulture, out var previousDaysCountValue);
-
-            inputParameters.PreviousDaysCount = previousDaysCountValue;
-
-            int.TryParse((ResultBox.FindName("VolumeMoreValue") as IntegerUpDown)?.Text, NumberStyles.Integer,
-                CultureInfo.InvariantCulture, out var volumeMoreValue);
-
-            inputParameters.VolumeMore = volumeMoreValue;
-
-            #endregion n дней
+            #endregion Количество дней до погашения
 
             return inputParameters;
         }
@@ -205,53 +193,31 @@ namespace SilverFir
 
             #endregion Доходность
 
-            #region Цена
+            #region Объём эмиссии
 
-            if (ResultBox.FindName("PriceMoreValue") is IntegerUpDown priceMoreValue)
+            if (ResultBox.FindName("IssueVolumeMoreValue") is IntegerUpDown issueVolumeMoreValue)
             {
-                priceMoreValue.Text = inputParameters.PriceMore.ToString(CultureInfo.InvariantCulture);
-                priceMoreValue.IsEnabled = isEnabled;
+                issueVolumeMoreValue.Text = inputParameters.IssueVolumeMore.ToString(CultureInfo.InvariantCulture);
+                issueVolumeMoreValue.IsEnabled = isEnabled;
             }
 
-            if (ResultBox.FindName("PriceLessValue") is IntegerUpDown priceLessValue)
+            #endregion Объём эмиссии
+
+            #region Количество дней до погашения
+
+            if (ResultBox.FindName("DaysToMaturityMoreValue") is IntegerUpDown daysToMaturityMoreValue)
             {
-                priceLessValue.Text = inputParameters.PriceLess.ToString(CultureInfo.InvariantCulture);
-                priceLessValue.IsEnabled = isEnabled;
+                daysToMaturityMoreValue.Text = inputParameters.DaysToMaturityMore.ToString(CultureInfo.InvariantCulture);
+                daysToMaturityMoreValue.IsEnabled = isEnabled;
             }
 
-            #endregion Цена
-
-            #region Дюрация
-
-            if (ResultBox.FindName("DurationMoreValue") is IntegerUpDown durationMoreValue)
+            if (ResultBox.FindName("DaysToMaturityLessValue") is IntegerUpDown daysToMaturityLessValue)
             {
-                durationMoreValue.Text = inputParameters.DurationMore.ToString(CultureInfo.InvariantCulture);
-                durationMoreValue.IsEnabled = isEnabled;
+                daysToMaturityLessValue.Text = inputParameters.DaysToMaturityLess.ToString(CultureInfo.InvariantCulture);
+                daysToMaturityLessValue.IsEnabled = isEnabled;
             }
 
-            if (ResultBox.FindName("DurationLessValue") is IntegerUpDown durationLessValue)
-            {
-                durationLessValue.Text = inputParameters.DurationLess.ToString(CultureInfo.InvariantCulture);
-                durationLessValue.IsEnabled = isEnabled;
-            }
-
-            #endregion Дюрация
-
-            #region n дней
-
-            if (ResultBox.FindName("PreviousDaysCountValue") is IntegerUpDown previousDaysCountValue)
-            {
-                previousDaysCountValue.Text = inputParameters.PreviousDaysCount.ToString(CultureInfo.InvariantCulture);
-                previousDaysCountValue.IsEnabled = isEnabled;
-            }
-
-            if (ResultBox.FindName("VolumeMoreValue") is IntegerUpDown volumeMoreValue)
-            {
-                volumeMoreValue.Text = inputParameters.VolumeMore.ToString(CultureInfo.InvariantCulture);
-                volumeMoreValue.IsEnabled = isEnabled;
-            }
-
-            #endregion n дней
+            #endregion Количество дней до погашения
         }
     }
 }

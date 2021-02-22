@@ -5,41 +5,26 @@
         /// <summary>
         ///     Доходность больше этой цифры
         /// </summary>
-        public decimal YieldMore { get; set; } = 7;
+        public decimal YieldMore { get; set; } = 8;
 
         /// <summary>
         ///     Доходность меньше этой цифры
         /// </summary>
-        public decimal YieldLess { get; set; } = 14;
+        public decimal YieldLess { get; set; } = 12;
 
         /// <summary>
-        ///     Цена больше этой цифры
+        ///     Объём эмиссии больше этой цифры
         /// </summary>
-        public decimal PriceMore { get; set; } = 95;
+        public decimal IssueVolumeMore { get; set; } = 2_000_000_000;
 
         /// <summary>
-        ///     Цена меньше этой цифры
+        ///     Дней до погашения больше этой цифры
         /// </summary>
-        public decimal PriceLess { get; set; } = 101;
+        public int DaysToMaturityMore { get; set; } = 700;
 
         /// <summary>
-        ///     Дюрация больше этой цифры
+        ///     Дней до погашения меньше этой цифры
         /// </summary>
-        public decimal DurationMore { get; set; } = 1;
-
-        /// <summary>
-        ///     Дюрация меньше этой цифры
-        /// </summary>
-        public decimal DurationLess { get; set; } = 6;
-
-        /// <summary>
-        ///     Поиск за последние n дней
-        /// </summary>
-        public int PreviousDaysCount { get; set; } = 15;
-
-        /// <summary>
-        ///     Объем сделок за n дней, шт. больше этой цифры
-        /// </summary>
-        public decimal VolumeMore { get; set; } = 5000;
+        public int DaysToMaturityLess { get; set; } = 1500;
     }
 }

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="SilverFir" Height="500" Width="700">
+        Title="SilverFir" Height="500" Width="750">
     <Grid x:Name="CommonWindow">
         <Grid x:Name="ResultBox">
             <Grid.ColumnDefinitions>
@@ -45,7 +45,7 @@
                    Grid.Column="0" />
 
             <xctk:IntegerUpDown Name="YieldMoreValue"
-                                Width="60"
+                                Width="90"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
                                 Increment="1"
@@ -61,7 +61,7 @@
                    Grid.Column="2" />
 
             <xctk:IntegerUpDown Name="YieldLessValue"
-                                Width="60"
+                                Width="90"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
                                 Increment="1"
@@ -69,15 +69,15 @@
                                 Grid.Row="0"
                                 Grid.Column="3" />
 
-            <Label Content="Цена&#x0a;больше, чем:"
-                   Name="PriceMore"
+            <Label Content="Объём&#x0a;эмиссии&#x0a;больше, чем:"
+                   Name="IssueVolumeMore"
                    HorizontalAlignment="Right"
                    VerticalAlignment="Center"
                    Grid.Row="0"
                    Grid.Column="4" />
 
-            <xctk:IntegerUpDown Name="PriceMoreValue"
-                                Width="60"
+            <xctk:IntegerUpDown Name="IssueVolumeMoreValue"
+                                Width="90"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
                                 Increment="1"
@@ -85,15 +85,15 @@
                                 Grid.Row="0"
                                 Grid.Column="5" />
 
-            <Label Content="Цена&#x0a;меньше, чем:"
-                   Name="PriceLess"
+            <Label Content="Дней до&#x0a;погашения&#x0a;больше, чем:"
+                   Name="DaysToMaturityMore"
                    HorizontalAlignment="Right"
                    VerticalAlignment="Center"
                    Grid.Row="0"
                    Grid.Column="6" />
 
-            <xctk:IntegerUpDown Name="PriceLessValue"
-                                Width="60"
+            <xctk:IntegerUpDown Name="DaysToMaturityMoreValue"
+                                Width="90"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
                                 Increment="1"
@@ -101,69 +101,22 @@
                                 Grid.Row="0"
                                 Grid.Column="7" />
 
-            <Label Content="Дюрация&#x0a;больше, чем:"
-                   Name="DurationMore"
-                   HorizontalAlignment="Right"
-                   VerticalAlignment="Center"
-                   Grid.Row="1"
-                   Grid.Column="0" />
-
-            <xctk:IntegerUpDown Name="DurationMoreValue"
-                                Width="60"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Center"
-                                Increment="1"
-                                Minimum="0"
-                                Grid.Row="1"
-                                Grid.Column="1" />
-
-            <Label Content="Дюрация&#x0a;меньше, чем:"
-                   Name="DurationLess"
-                   HorizontalAlignment="Right"
-                   VerticalAlignment="Center"
-                   Grid.Row="1"
-                   Grid.Column="2" />
-
-            <xctk:IntegerUpDown Name="DurationLessValue"
-                                Width="60"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Center"
-                                Increment="1"
-                                Minimum="0"
-                                Grid.Row="1"
-                                Grid.Column="3" />
-
-            <Label Content="Поиск за&#x0a;последние n&#x0a;дней:"
-                   Name="PreviousDaysCount"
-                   HorizontalAlignment="Right"
-                   VerticalAlignment="Center"
-                   Grid.Row="1"
-                   Grid.Column="4" />
-
-            <xctk:IntegerUpDown Name="PreviousDaysCountValue"
-                                Width="60"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Center"
-                                Increment="1"
-                                Minimum="0"
-                                Grid.Row="1"
-                                Grid.Column="5" />
-
-            <Label Content="Объем&#x0a;сделок за n&#x0a;дней:"
-                   Name="VolumeMore"
+            <Label Content="Дней до&#x0a;погашения&#x0a;меньше, чем:"
+                   Name="DaysToMaturityLess"
                    HorizontalAlignment="Right"
                    VerticalAlignment="Center"
                    Grid.Row="1"
                    Grid.Column="6" />
 
-            <xctk:IntegerUpDown Name="VolumeMoreValue"
-                                Width="60"
+            <xctk:IntegerUpDown Name="DaysToMaturityLessValue"
+                                Width="90"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
                                 Increment="1"
                                 Minimum="0"
                                 Grid.Row="1"
                                 Grid.Column="7" />
+
         </Grid>
     </Grid>
 </Window>

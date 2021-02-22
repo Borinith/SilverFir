@@ -1,19 +1,42 @@
-﻿namespace SilverFir.MoexClasses
+﻿using System;
+
+namespace SilverFir.MoexClasses
 {
     public class BondsResult
     {
+        /// <summary>
+        ///     Наименование
+        /// </summary>
         public string BondName { get; set; }
 
-        public string SecId { get; set; }
+        /// <summary>
+        ///     Налоговые льготы для корпоративных облигаций, выпущенных с 1 января 2017 года
+        /// </summary>
+        public bool BondTax { get; set; }
 
-        public decimal BondPrice { get; set; }
-
-        public decimal BondVolume { get; set; }
-
+        /// <summary>
+        ///     Доходность
+        /// </summary>
         public decimal BondYield { get; set; }
 
-        public decimal BondDuration { get; set; }
+        /// <summary>
+        ///     Объём эмиссии
+        /// </summary>
+        public decimal IssueVolume { get; set; }
 
-        public bool BondTax { get; set; }
+        /// <summary>
+        ///     Дата погашения
+        /// </summary>
+        public DateTime MaturityDate { get; set; }
+
+        /// <summary>
+        ///     Состояние выпуска
+        /// </summary>
+        public bool ReleaseStatus { get; set; }
+
+        /// <summary>
+        ///     Код ценной бумаги
+        /// </summary>
+        public string SecId { get; set; }
     }
 }
