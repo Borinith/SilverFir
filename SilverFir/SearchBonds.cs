@@ -38,7 +38,7 @@ namespace SilverFir
                     {
                         var resultBoardGroup = JsonConvert.DeserializeObject<BoardGroups>(client.DownloadString(url).Replace("\\\"", ""));
 
-                        for (var data = 0; data < resultBoardGroup.Securities.Data.Count; data++)
+                        Parallel.For(0, resultBoardGroup.Securities.Data.Count, data =>
                         {
                             // Код ценной бумаги
                             var secId = resultBoardGroup.Securities.Data[data][0]?.ToString() ?? string.Empty;
@@ -58,7 +58,7 @@ namespace SilverFir
                             // Дата погашения
                             if (!DateTime.TryParse(resultBoardGroup.Securities.Data[data][3]?.ToString() ?? string.Empty, out var maturityDate))
                             {
-                                continue;
+                                return;
                             }
 
                             // Дней до погашения
@@ -81,7 +81,7 @@ namespace SilverFir
                             {
                                 var bondTax = MoexSearchTax(secId);
 
-                                result.Add(new BondsResult
+                                var bond = new BondsResult
                                 {
                                     BondName = bondName,
                                     BondTax = bondTax,
@@ -90,13 +90,18 @@ namespace SilverFir
                                     MaturityDate = maturityDate,
                                     ReleaseStatus = true,
                                     SecId = secId
-                                });
+                                };
+
+                                lock (result)
+                                {
+                                    result.Add(bond);
+                                }
                             }
-                        }
+                        });
                     }
                 }
 
-                return result.Count == 0 ? null : result.OrderByDescending(x => x.MaturityDate).ToList();
+                return result.Count == 0 ? null : result.OrderByDescending(x => x.MaturityDate).ThenBy(x => x.SecId).ToList();
             });
 
             return task;

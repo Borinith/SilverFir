@@ -48,8 +48,6 @@ namespace SilverFir
 
         private async void ButtonClickAsync(object sender, RoutedEventArgs e)
         {
-            //GridButtons.Children.Clear();
-
             var newInputParameters = NewInputParameters();
 
             if (sender is Button senderButton && ResultBox.FindName("OutputBox") is TextBox result)
