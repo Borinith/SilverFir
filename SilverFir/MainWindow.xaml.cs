@@ -48,10 +48,10 @@ namespace SilverFir
 
         private async void ButtonClickAsync(object sender, RoutedEventArgs e)
         {
-            var newInputParameters = NewInputParameters();
-
             if (sender is Button senderButton && ResultBox.FindName("OutputBox") is TextBox result)
             {
+                var newInputParameters = NewInputParameters();
+
                 switch (senderButton.Content.ToString())
                 {
                     case "Get bonds":
@@ -112,21 +112,23 @@ namespace SilverFir
 
         private void CreateButtons()
         {
-            var buttons = _buttons;
+            if (_buttons.TryGetValue("Get bonds", out var getBonds))
+            {
+                Grid.SetColumnSpan(getBonds, 2);
+                Grid.SetRow(getBonds, 6);
+                Grid.SetColumn(getBonds, 2);
+                getBonds.Click += ButtonClickAsync;
+                ResultBox.Children.Add(getBonds);
+            }
 
-            buttons.TryGetValue("Get bonds", out var getBonds);
-            Grid.SetColumnSpan(getBonds ?? throw new InvalidOperationException(), 2);
-            Grid.SetRow(getBonds, 6);
-            Grid.SetColumn(getBonds, 2);
-            getBonds.Click += ButtonClickAsync;
-            ResultBox.Children.Add(getBonds);
-
-            buttons.TryGetValue("Clear", out var clearWindow);
-            Grid.SetColumnSpan(clearWindow ?? throw new InvalidOperationException(), 2);
-            Grid.SetRow(clearWindow, 6);
-            Grid.SetColumn(clearWindow, 4);
-            clearWindow.Click += ButtonClickAsync;
-            ResultBox.Children.Add(clearWindow);
+            if (_buttons.TryGetValue("Clear", out var clearWindow))
+            {
+                Grid.SetColumnSpan(clearWindow, 2);
+                Grid.SetRow(clearWindow, 6);
+                Grid.SetColumn(clearWindow, 4);
+                clearWindow.Click += ButtonClickAsync;
+                ResultBox.Children.Add(clearWindow);
+            }
         }
 
         private InputParameters NewInputParameters()
