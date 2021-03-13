@@ -15,8 +15,6 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
             <Grid.RowDefinitions>
@@ -32,7 +30,7 @@
             <TextBox x:Name="OutputBox"
                      IsReadOnly="True"
                      VerticalScrollBarVisibility="Auto"
-                     Grid.ColumnSpan="6"
+                     Grid.ColumnSpan="4"
                      Grid.RowSpan="4"
                      Grid.Column="1"
                      Grid.Row="2" />
@@ -89,8 +87,8 @@
                    Name="DaysToMaturityMore"
                    HorizontalAlignment="Right"
                    VerticalAlignment="Center"
-                   Grid.Row="0"
-                   Grid.Column="6" />
+                   Grid.Row="1"
+                   Grid.Column="0" />
 
             <xctk:IntegerUpDown Name="DaysToMaturityMoreValue"
                                 Width="90"
@@ -98,15 +96,15 @@
                                 VerticalAlignment="Center"
                                 Increment="1"
                                 Minimum="0"
-                                Grid.Row="0"
-                                Grid.Column="7" />
+                                Grid.Row="1"
+                                Grid.Column="1" />
 
             <Label Content="Дней до&#x0a;погашения&#x0a;меньше, чем:"
                    Name="DaysToMaturityLess"
                    HorizontalAlignment="Right"
                    VerticalAlignment="Center"
                    Grid.Row="1"
-                   Grid.Column="6" />
+                   Grid.Column="2" />
 
             <xctk:IntegerUpDown Name="DaysToMaturityLessValue"
                                 Width="90"
@@ -115,7 +113,7 @@
                                 Increment="1"
                                 Minimum="0"
                                 Grid.Row="1"
-                                Grid.Column="7" />
+                                Grid.Column="3" />
 
         </Grid>
     </Grid>

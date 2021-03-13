@@ -119,7 +119,7 @@ namespace SilverFir
             {
                 var tax = JsonConvert.DeserializeObject<MoexTax>(client.DownloadString(url));
 
-                var startDateMoex = tax.Description.Data.Where(x => x[0]?.ToString() == "STARTDATEMOEX").Select(x => x[2]).FirstOrDefault()?.ToString();
+                var startDateMoex = tax.Description.Data.Where(x => x[0]?.ToString() == "STARTDATEMOEX").Select(x => x[2]).FirstOrDefault()?.ToString() ?? string.Empty;
 
                 if (DateTime.TryParse(startDateMoex, out var startDate))
                 {

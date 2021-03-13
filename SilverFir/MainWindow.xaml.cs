@@ -80,11 +80,11 @@ namespace SilverFir
                                                                           x.BondName +
                                                                           "\t   " +
                                                                           x.MaturityDate.ToString("dd.MM.yyyy") +
-                                                                          "\t   " +
+                                                                          "\t  " +
                                                                           x.BondYield +
                                                                           "\t   " +
                                                                           x.IssueVolume +
-                                                                          "\t   " +
+                                                                          "\t  " +
                                                                           x.BondTax))
                                     : "Нет облигаций для выбранных параметров";
                             }
@@ -116,7 +116,7 @@ namespace SilverFir
             {
                 Grid.SetColumnSpan(getBonds, 2);
                 Grid.SetRow(getBonds, 6);
-                Grid.SetColumn(getBonds, 2);
+                Grid.SetColumn(getBonds, 1);
                 getBonds.Click += ButtonClickAsync;
                 ResultBox.Children.Add(getBonds);
             }
@@ -125,7 +125,7 @@ namespace SilverFir
             {
                 Grid.SetColumnSpan(clearWindow, 2);
                 Grid.SetRow(clearWindow, 6);
-                Grid.SetColumn(clearWindow, 4);
+                Grid.SetColumn(clearWindow, 3);
                 clearWindow.Click += ButtonClickAsync;
                 ResultBox.Children.Add(clearWindow);
             }
