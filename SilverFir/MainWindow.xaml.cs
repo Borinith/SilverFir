@@ -83,9 +83,7 @@ namespace SilverFir
                                                                           "\t  " +
                                                                           x.BondYield +
                                                                           "\t   " +
-                                                                          x.IssueVolume +
-                                                                          "\t  " +
-                                                                          x.BondTax))
+                                                                          x.IssueVolume))
                                     : "Нет облигаций для выбранных параметров";
                             }
                             catch (Exception)

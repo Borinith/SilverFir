@@ -7,6 +7,7 @@ namespace SilverFir.MoexClasses
     {
         public List<string> Columns { get; set; }
 
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
         public List<ArrayList> Data { get; set; }
     }
 }

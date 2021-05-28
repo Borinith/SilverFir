@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="SilverFir" Height="500" Width="750">
+        Title="SilverFir" Height="500" Width="700">
     <Grid x:Name="CommonWindow">
         <Grid x:Name="ResultBox">
             <Grid.ColumnDefinitions>
