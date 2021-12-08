@@ -74,7 +74,7 @@ namespace SilverFir
                             {
                                 var bonds = await SearchBonds.MoexSearchBonds(newInputParameters);
 
-                                result.Text = bonds != null
+                                result.Text = bonds.Any()
                                     ? string.Join("\n", bonds.Select(x => x.SecId +
                                                                           "\t   " +
                                                                           x.BondName +
