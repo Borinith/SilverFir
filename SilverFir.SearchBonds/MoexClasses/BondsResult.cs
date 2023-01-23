@@ -1,13 +1,13 @@
 ﻿using System;
 
-namespace SilverFir.MoexClasses
+namespace SilverFir.SearchBonds.MoexClasses
 {
-    public class BondsResult
+    public record BondsResult
     {
         /// <summary>
         ///     Наименование
         /// </summary>
-        public string BondName { get; init; }
+        public string? BondName { get; init; }
 
         /// <summary>
         ///     Доходность
@@ -32,6 +32,6 @@ namespace SilverFir.MoexClasses
         /// <summary>
         ///     Код ценной бумаги
         /// </summary>
-        public string SecId { get; init; }
+        public string? SecId { get; init; }
     }
 }

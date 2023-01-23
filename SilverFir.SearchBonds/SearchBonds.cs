@@ -1,18 +1,19 @@
 ﻿using Newtonsoft.Json;
-using SilverFir.MoexClasses;
+using SilverFir.SearchBonds.MoexClasses;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace SilverFir
+namespace SilverFir.SearchBonds
 {
     /// <summary>
     ///     Поиск облигаций
     /// </summary>
-    internal static class SearchBonds
+    public class SearchBonds : ISearchBonds
     {
         // Первоначальная номинальная стоимость
         private const int INITIAL_NOMINAL_VALUE = 1000;
@@ -20,7 +21,7 @@ namespace SilverFir
         /// <summary>
         ///     Поиск облигаций по параметрам
         /// </summary>
-        internal static async Task<List<BondsResult>> MoexSearchBonds(InputParameters inputParameters)
+        public async Task<List<BondsResult>> MoexSearchBonds(InputParameters inputParameters)
         {
             var result = new ConcurrentDictionary<string, BondsResult>();
 
@@ -35,16 +36,20 @@ namespace SilverFir
             {
                 var url = $"https://iss.moex.com/iss/engines/stock/markets/bonds/boardgroups/{boardgroup}/securities.json?iss.dp=comma&iss.meta=off&iss.only=securities&securities.columns=SECID,SHORTNAME,ISSUESIZEPLACED,MATDATE,COUPONPERCENT,STATUS";
 
-                var client = new HttpClient();
-
+                using (var client = new HttpClient())
                 using (var response = await client.GetAsync(url))
                 using (var content = response.Content)
                 {
+                    if (response.StatusCode != HttpStatusCode.OK)
+                    {
+                        throw new Exception();
+                    }
+
                     var json = await content.ReadAsStringAsync();
 
                     var resultBoardGroup = JsonConvert.DeserializeObject<BoardGroups>(json.Replace("\\\"", string.Empty));
 
-                    if (resultBoardGroup != null)
+                    if (resultBoardGroup?.Securities?.Data is not null)
                     {
                         Parallel.ForEach(resultBoardGroup.Securities.Data, data =>
                         {

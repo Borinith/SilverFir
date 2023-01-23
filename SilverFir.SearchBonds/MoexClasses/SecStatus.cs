@@ -1,4 +1,4 @@
-﻿namespace SilverFir.MoexClasses
+﻿namespace SilverFir.SearchBonds.MoexClasses
 {
     /// <summary>
     ///     Статус финансового инструмента
@@ -8,16 +8,16 @@
         /// <summary>
         ///     Операции разрешены
         /// </summary>
-        A,
+        A = 0,
 
         /// <summary>
         ///     Операции запрещены
         /// </summary>
-        S,
+        S = 1,
 
         /// <summary>
         ///     Заблокировано для торгов, разрешено исполнение сделок
         /// </summary>
-        N
+        N = 2
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace SilverFir
+﻿namespace SilverFir.SearchBonds
 {
     public class InputParameters
     {
