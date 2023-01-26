@@ -34,4 +34,8 @@
     <ProjectReference Include="..\SilverFir.SearchBonds\SilverFir.SearchBonds.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="LanguageService\" />
+  </ItemGroup>
+
 </Project>

@@ -1,4 +1,5 @@
-﻿using SilverFir.SearchBonds;
+﻿using SilverFir.LanguageService;
+using SilverFir.SearchBonds;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -15,13 +16,15 @@ namespace SilverFir
     /// </summary>
     public partial class MainWindow
     {
+        private readonly ILanguageService _languageService;
         private readonly ISearchBonds _searchBonds;
 
         /// <summary>
         ///     Main window
         /// </summary>
-        public MainWindow(ISearchBonds searchBonds)
+        public MainWindow(ILanguageService languageService, ISearchBonds searchBonds)
         {
+            _languageService = languageService;
             _searchBonds = searchBonds;
 
             InitializeComponent();
@@ -50,7 +53,7 @@ namespace SilverFir
             var outputBox = new TextBox
             {
                 IsReadOnly = true,
-                Name = "OutputBox",
+                Name = RegisterNames.OUTPUT_BOX,
                 VerticalScrollBarVisibility = ScrollBarVisibility.Auto
             };
 
@@ -61,7 +64,7 @@ namespace SilverFir
 
             CommonWindow.Children.Add(outputBox);
 
-            RegisterName("OutputBox", outputBox);
+            RegisterName(RegisterNames.OUTPUT_BOX, outputBox);
 
             #endregion Output box
 
@@ -69,9 +72,8 @@ namespace SilverFir
 
             var yieldMore = new Label
             {
-                Content = "Доходность\nбольше, чем:",
+                Content = _languageService.YieldMoreText,
                 HorizontalAlignment = HorizontalAlignment.Right,
-                Name = "YieldMore",
                 VerticalAlignment = VerticalAlignment.Center
             };
 
@@ -85,7 +87,7 @@ namespace SilverFir
                 HorizontalAlignment = HorizontalAlignment.Left,
                 Increment = 1,
                 Minimum = 0,
-                Name = "YieldMoreValue",
+                Name = RegisterNames.YIELD_MORE_VALUE,
                 VerticalAlignment = VerticalAlignment.Center,
                 Width = 90
             };
@@ -95,7 +97,7 @@ namespace SilverFir
 
             CommonWindow.Children.Add(yieldMoreValue);
 
-            RegisterName("YieldMoreValue", yieldMoreValue);
+            RegisterName(RegisterNames.YIELD_MORE_VALUE, yieldMoreValue);
 
             #endregion Yield more
 
@@ -103,9 +105,8 @@ namespace SilverFir
 
             var yieldLess = new Label
             {
-                Content = "Доходность\nменьше, чем:",
+                Content = _languageService.YieldLessText,
                 HorizontalAlignment = HorizontalAlignment.Right,
-                Name = "YieldLess",
                 VerticalAlignment = VerticalAlignment.Center
             };
 
@@ -119,7 +120,7 @@ namespace SilverFir
                 HorizontalAlignment = HorizontalAlignment.Left,
                 Increment = 1,
                 Minimum = 0,
-                Name = "YieldLessValue",
+                Name = RegisterNames.YIELD_LESS_VALUE,
                 VerticalAlignment = VerticalAlignment.Center,
                 Width = 90
             };
@@ -129,7 +130,7 @@ namespace SilverFir
 
             CommonWindow.Children.Add(yieldLessValue);
 
-            RegisterName("YieldLessValue", yieldLessValue);
+            RegisterName(RegisterNames.YIELD_LESS_VALUE, yieldLessValue);
 
             #endregion Yield less
 
@@ -137,9 +138,8 @@ namespace SilverFir
 
             var issueVolumeMore = new Label
             {
-                Content = "Объём\nэмиссии\nбольше, чем:",
+                Content = _languageService.IssueVolumeMoreText,
                 HorizontalAlignment = HorizontalAlignment.Right,
-                Name = "IssueVolumeMore",
                 VerticalAlignment = VerticalAlignment.Center
             };
 
@@ -153,7 +153,7 @@ namespace SilverFir
                 HorizontalAlignment = HorizontalAlignment.Left,
                 Increment = 1,
                 Minimum = 0,
-                Name = "IssueVolumeMoreValue",
+                Name = RegisterNames.ISSUE_VOLUME_MORE_VALUE,
                 VerticalAlignment = VerticalAlignment.Center,
                 Width = 90
             };
@@ -163,7 +163,7 @@ namespace SilverFir
 
             CommonWindow.Children.Add(issueVolumeMoreValue);
 
-            RegisterName("IssueVolumeMoreValue", issueVolumeMoreValue);
+            RegisterName(RegisterNames.ISSUE_VOLUME_MORE_VALUE, issueVolumeMoreValue);
 
             #endregion Issue volume more
 
@@ -171,9 +171,8 @@ namespace SilverFir
 
             var daysToMaturityMore = new Label
             {
-                Content = "Дней до\nпогашения\nбольше, чем:",
+                Content = _languageService.DaysToMaturityMoreText,
                 HorizontalAlignment = HorizontalAlignment.Right,
-                Name = "DaysToMaturityMore",
                 VerticalAlignment = VerticalAlignment.Center
             };
 
@@ -187,7 +186,7 @@ namespace SilverFir
                 HorizontalAlignment = HorizontalAlignment.Left,
                 Increment = 1,
                 Minimum = 0,
-                Name = "DaysToMaturityMoreValue",
+                Name = RegisterNames.DAYS_TO_MATURITY_MORE_VALUE,
                 VerticalAlignment = VerticalAlignment.Center,
                 Width = 90
             };
@@ -197,7 +196,7 @@ namespace SilverFir
 
             CommonWindow.Children.Add(daysToMaturityMoreValue);
 
-            RegisterName("DaysToMaturityMoreValue", daysToMaturityMoreValue);
+            RegisterName(RegisterNames.DAYS_TO_MATURITY_MORE_VALUE, daysToMaturityMoreValue);
 
             #endregion Days to maturity more
 
@@ -205,9 +204,8 @@ namespace SilverFir
 
             var daysToMaturityLess = new Label
             {
-                Content = "Дней до\nпогашения\nменьше, чем:",
+                Content = _languageService.DaysToMaturityLessText,
                 HorizontalAlignment = HorizontalAlignment.Right,
-                Name = "DaysToMaturityLess",
                 VerticalAlignment = VerticalAlignment.Center
             };
 
@@ -221,7 +219,7 @@ namespace SilverFir
                 HorizontalAlignment = HorizontalAlignment.Left,
                 Increment = 1,
                 Minimum = 0,
-                Name = "DaysToMaturityLessValue",
+                Name = RegisterNames.DAYS_TO_MATURITY_LESS_VALUE,
                 VerticalAlignment = VerticalAlignment.Center,
                 Width = 90
             };
@@ -231,7 +229,7 @@ namespace SilverFir
 
             CommonWindow.Children.Add(daysToMaturityLessValue);
 
-            RegisterName("DaysToMaturityLessValue", daysToMaturityLessValue);
+            RegisterName(RegisterNames.DAYS_TO_MATURITY_LESS_VALUE, daysToMaturityLessValue);
 
             #endregion Days to maturity less
 
@@ -239,10 +237,10 @@ namespace SilverFir
 
             var getBondsButton = new Button
             {
-                Content = RegisterNames.GET_BONDS,
+                Content = _languageService.GetBondsButtonText,
                 Height = 30,
                 HorizontalAlignment = HorizontalAlignment.Center,
-                Name = "GetBonds",
+                Name = RegisterNames.GET_BONDS,
                 VerticalAlignment = VerticalAlignment.Center,
                 Width = 120
             };
@@ -254,7 +252,7 @@ namespace SilverFir
             getBondsButton.Click += ButtonClickAsync;
             CommonWindow.Children.Add(getBondsButton);
 
-            RegisterName("GetBonds", getBondsButton);
+            RegisterName(RegisterNames.GET_BONDS, getBondsButton);
 
             #endregion Get bonds button
 
@@ -262,10 +260,10 @@ namespace SilverFir
 
             var clearButton = new Button
             {
-                Content = RegisterNames.CLEAR,
+                Content = _languageService.ClearButtonText,
                 Height = 30,
                 HorizontalAlignment = HorizontalAlignment.Center,
-                Name = "Clear",
+                Name = RegisterNames.CLEAR,
                 VerticalAlignment = VerticalAlignment.Center,
                 Width = 120
             };
@@ -277,18 +275,29 @@ namespace SilverFir
             clearButton.Click += ButtonClickAsync;
             CommonWindow.Children.Add(clearButton);
 
-            RegisterName("Clear", clearButton);
+            RegisterName(RegisterNames.CLEAR, clearButton);
 
             #endregion Clear button
         }
 
         private async void ButtonClickAsync(object sender, RoutedEventArgs e)
         {
-            if (sender is Button senderButton && CommonWindow.FindName("OutputBox") is TextBox result)
+            if (sender is Button senderButton && CommonWindow.FindName(RegisterNames.OUTPUT_BOX) is TextBox result)
             {
-                var newInputParameters = NewInputParameters();
+                InputParameters newInputParameters;
 
-                switch (senderButton.Content.ToString())
+                try
+                {
+                    newInputParameters = NewInputParameters();
+                }
+                catch (Exception ex)
+                {
+                    result.Text = ex.Message;
+
+                    return;
+                }
+
+                switch (senderButton.Name)
                 {
                     case RegisterNames.GET_BONDS:
                     {
@@ -304,7 +313,7 @@ namespace SilverFir
                             }
                             catch (Exception)
                             {
-                                result.Text = "Ошибка подключения";
+                                result.Text = _languageService.ConnectionErrorText;
                             }
                         }
                         else
@@ -330,33 +339,69 @@ namespace SilverFir
         private InputParameters NewInputParameters()
         {
             var inputParameters = new InputParameters();
+            var errors = new List<string>();
 
             #region Доходность
 
-            int.TryParse((CommonWindow.FindName("YieldMoreValue") as IntegerUpDown)?.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var yieldMoreValue);
+            var isYieldMoreParsed = int.TryParse((CommonWindow.FindName(RegisterNames.YIELD_MORE_VALUE) as IntegerUpDown)?.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var yieldMoreValue);
+
+            if (!isYieldMoreParsed)
+            {
+                errors.Add(_languageService.YieldMoreParsingErrorText);
+            }
+
             inputParameters.YieldMore = yieldMoreValue;
 
-            int.TryParse((CommonWindow.FindName("YieldLessValue") as IntegerUpDown)?.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var yieldLessValue);
+            var isYieldLessParsed = int.TryParse((CommonWindow.FindName(RegisterNames.YIELD_LESS_VALUE) as IntegerUpDown)?.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var yieldLessValue);
+
+            if (!isYieldLessParsed)
+            {
+                errors.Add(_languageService.YieldLessParsingErrorText);
+            }
+
             inputParameters.YieldLess = yieldLessValue;
 
             #endregion Доходность
 
             #region Объём эмиссии
 
-            int.TryParse((CommonWindow.FindName("IssueVolumeMoreValue") as IntegerUpDown)?.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var issueVolumeMoreValue);
+            var isIssueVolumeMoreParsed = int.TryParse((CommonWindow.FindName(RegisterNames.ISSUE_VOLUME_MORE_VALUE) as IntegerUpDown)?.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var issueVolumeMoreValue);
+
+            if (!isIssueVolumeMoreParsed)
+            {
+                errors.Add(_languageService.IssueVolumeMoreParsingErrorText);
+            }
+
             inputParameters.IssueVolumeMore = issueVolumeMoreValue;
 
             #endregion Объём эмиссии
 
             #region Количество дней до погашения
 
-            int.TryParse((CommonWindow.FindName("DaysToMaturityMoreValue") as IntegerUpDown)?.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var daysToMaturityMoreValue);
+            var isDaysToMaturityMoreParsed = int.TryParse((CommonWindow.FindName(RegisterNames.DAYS_TO_MATURITY_MORE_VALUE) as IntegerUpDown)?.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var daysToMaturityMoreValue);
+
+            if (!isDaysToMaturityMoreParsed)
+            {
+                errors.Add(_languageService.DaysToMaturityMoreParsingErrorText);
+            }
+
             inputParameters.DaysToMaturityMore = daysToMaturityMoreValue;
 
-            int.TryParse((CommonWindow.FindName("DaysToMaturityLessValue") as IntegerUpDown)?.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var daysToMaturityLessValue);
+            var isDaysToMaturityLessParsed = int.TryParse((CommonWindow.FindName(RegisterNames.DAYS_TO_MATURITY_LESS_VALUE) as IntegerUpDown)?.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var daysToMaturityLessValue);
+
+            if (!isDaysToMaturityLessParsed)
+            {
+                errors.Add(_languageService.DaysToMaturityLessParsingErrorText);
+            }
+
             inputParameters.DaysToMaturityLess = daysToMaturityLessValue;
 
             #endregion Количество дней до погашения
+
+            if (errors.Any())
+            {
+                throw new Exception(string.Join("\n", errors));
+            }
 
             return inputParameters;
         }
@@ -365,13 +410,13 @@ namespace SilverFir
         {
             #region Доходность
 
-            if (CommonWindow.FindName("YieldMoreValue") is IntegerUpDown yieldMoreValue)
+            if (CommonWindow.FindName(RegisterNames.YIELD_MORE_VALUE) is IntegerUpDown yieldMoreValue)
             {
                 yieldMoreValue.Text = inputParameters.YieldMore.ToString(CultureInfo.InvariantCulture);
                 yieldMoreValue.IsEnabled = isEnabled;
             }
 
-            if (CommonWindow.FindName("YieldLessValue") is IntegerUpDown yieldLessValue)
+            if (CommonWindow.FindName(RegisterNames.YIELD_LESS_VALUE) is IntegerUpDown yieldLessValue)
             {
                 yieldLessValue.Text = inputParameters.YieldLess.ToString(CultureInfo.InvariantCulture);
                 yieldLessValue.IsEnabled = isEnabled;
@@ -381,7 +426,7 @@ namespace SilverFir
 
             #region Объём эмиссии
 
-            if (CommonWindow.FindName("IssueVolumeMoreValue") is IntegerUpDown issueVolumeMoreValue)
+            if (CommonWindow.FindName(RegisterNames.ISSUE_VOLUME_MORE_VALUE) is IntegerUpDown issueVolumeMoreValue)
             {
                 issueVolumeMoreValue.Text = inputParameters.IssueVolumeMore.ToString(CultureInfo.InvariantCulture);
                 issueVolumeMoreValue.IsEnabled = isEnabled;
@@ -391,13 +436,13 @@ namespace SilverFir
 
             #region Количество дней до погашения
 
-            if (CommonWindow.FindName("DaysToMaturityMoreValue") is IntegerUpDown daysToMaturityMoreValue)
+            if (CommonWindow.FindName(RegisterNames.DAYS_TO_MATURITY_MORE_VALUE) is IntegerUpDown daysToMaturityMoreValue)
             {
                 daysToMaturityMoreValue.Text = inputParameters.DaysToMaturityMore.ToString(CultureInfo.InvariantCulture);
                 daysToMaturityMoreValue.IsEnabled = isEnabled;
             }
 
-            if (CommonWindow.FindName("DaysToMaturityLessValue") is IntegerUpDown daysToMaturityLessValue)
+            if (CommonWindow.FindName(RegisterNames.DAYS_TO_MATURITY_LESS_VALUE) is IntegerUpDown daysToMaturityLessValue)
             {
                 daysToMaturityLessValue.Text = inputParameters.DaysToMaturityLess.ToString(CultureInfo.InvariantCulture);
                 daysToMaturityLessValue.IsEnabled = isEnabled;
@@ -407,12 +452,12 @@ namespace SilverFir
 
             #region Кнопки
 
-            if (CommonWindow.FindName("GetBonds") is Button getBondsButton)
+            if (CommonWindow.FindName(RegisterNames.GET_BONDS) is Button getBondsButton)
             {
                 getBondsButton.IsEnabled = isEnabled;
             }
 
-            if (CommonWindow.FindName("Clear") is Button clearButton)
+            if (CommonWindow.FindName(RegisterNames.CLEAR) is Button clearButton)
             {
                 clearButton.IsEnabled = isEnabled;
             }
@@ -420,18 +465,18 @@ namespace SilverFir
             #endregion Кнопки
         }
 
-        private static List<string> ErrorsInputParameters(InputParameters inputParameters)
+        private List<string> ErrorsInputParameters(InputParameters inputParameters)
         {
             var errors = new List<string>();
 
             if (inputParameters.YieldMore > inputParameters.YieldLess)
             {
-                errors.Add("Неверные значения доходности");
+                errors.Add(_languageService.IncorrectYieldValuesText);
             }
 
             if (inputParameters.DaysToMaturityMore > inputParameters.DaysToMaturityLess)
             {
-                errors.Add("Неверные значения количества дней до погашения");
+                errors.Add(_languageService.IncorrectDaysToMaturityValuesText);
             }
 
             return errors;
@@ -442,16 +487,16 @@ namespace SilverFir
             var bonds = await _searchBonds.MoexSearchBonds(inputParameters);
 
             return bonds.Any()
-                ? string.Join("\n", bonds.Select(x => x.SecId +
+                ? string.Join("\n", bonds.Select(x => (x.SecId ?? string.Empty) +
                                                       "\t   " +
-                                                      x.BondName +
+                                                      (x.BondName ?? string.Empty) +
                                                       "\t   " +
                                                       x.MaturityDate.ToString("dd.MM.yyyy") +
                                                       "\t  " +
                                                       x.BondYield +
                                                       "\t   " +
                                                       x.IssueVolume))
-                : "Нет облигаций для выбранных параметров";
+                : _languageService.NoBondsForSelectedParametersText;
         }
     }
 }

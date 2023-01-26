@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SilverFir.LanguageService;
 using SilverFir.SearchBonds;
 using System;
 
@@ -17,9 +18,9 @@ namespace SilverFir
                        {
                            services.AddSingleton<App>();
                            services.AddSingleton<MainWindow>();
-                           services.AddTransient<ISearchBonds, SearchBonds.SearchBonds>();
-                           //services.AddTransient<ILanguageService, EngLanguageService>();
-                           //services.AddTransient<ILanguageService, RusLanguageService>();
+                           services.AddScoped<ISearchBonds, SearchBonds.SearchBonds>();
+                           //services.AddSingleton<ILanguageService, EngLanguageService>();
+                           services.AddSingleton<ILanguageService, RusLanguageService>();
                        })
                        .Build())
             {
