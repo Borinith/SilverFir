@@ -3,10 +3,12 @@ using SilverFir.SearchBonds;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 using Xceed.Wpf.Toolkit;
 
 namespace SilverFir
@@ -16,21 +18,111 @@ namespace SilverFir
     /// </summary>
     public partial class MainWindow
     {
-        private readonly ILanguageService _languageService;
+        private const string CANNOT_LOAD_LANGUAGE = "Cannot load language";
+        private const string LANGUAGE_IMAGES_FOLDER = "LanguageImages";
+        private readonly HashSet<string> _constants = new();
+        private readonly Dictionary<LanguageEnum, string> _imagePaths = new();
+        private readonly ProxyLanguage.ProxyLanguageResolver _resovler;
         private readonly ISearchBonds _searchBonds;
+        private LanguageEnum _currentLanguage = LanguageEnum.English;
+        private ILanguageService _languageService = null!;
+        private TextAlignment _textAlignment = TextAlignment.Left;
 
         /// <summary>
         ///     Main window
         /// </summary>
-        public MainWindow(ILanguageService languageService, ISearchBonds searchBonds)
+        public MainWindow(ProxyLanguage.ProxyLanguageResolver resovler, ISearchBonds searchBonds)
         {
-            _languageService = languageService;
+            _resovler = resovler;
             _searchBonds = searchBonds;
 
+            foreach (var language in Enum.GetValues<LanguageEnum>())
+            {
+                _imagePaths.Add(language, $"{language}.png");
+            }
+
+            UpdateLanguage();
+
             InitializeComponent();
-            CommonWindow.Children.Clear();
+            ChildrenClear();
+
             DrawMainWindow();
             SearchParameters(new InputParameters(), true);
+        }
+
+        private async void ButtonClickAsync(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button senderButton && CommonWindow.FindName(RegisterNames.OUTPUT_BOX) is TextBox result)
+            {
+                InputParameters newInputParameters;
+
+                try
+                {
+                    newInputParameters = NewInputParameters();
+                }
+                catch (Exception ex)
+                {
+                    result.Text = ex.Message;
+
+                    return;
+                }
+
+                switch (senderButton.Name)
+                {
+                    case RegisterNames.GET_BONDS:
+                    {
+                        SearchParameters(newInputParameters, false);
+
+                        var errors = ErrorsInputParameters(newInputParameters);
+
+                        if (errors.All(x => x.Value == false))
+                        {
+                            try
+                            {
+                                result.Text = await SearchBondsResult(newInputParameters);
+                                result.TextAlignment = TextAlignment.Left;
+                            }
+                            catch (Exception)
+                            {
+                                result.Text = _languageService.ConnectionErrorText;
+                            }
+                        }
+                        else
+                        {
+                            result.Text = string.Join("\n", errors.Where(x => x.Value).Select(x => x.Key));
+                        }
+
+                        break;
+                    }
+
+                    case RegisterNames.CLEAR:
+                    {
+                        result.Text = string.Empty;
+
+                        break;
+                    }
+                }
+
+                SearchParameters(newInputParameters, true);
+            }
+        }
+
+        /// <summary>
+        ///     Очищаем поле
+        /// </summary>
+        private void ChildrenClear()
+        {
+            CommonWindow.Children.Clear();
+            CommonWindow.RowDefinitions.Clear();
+            CommonWindow.ColumnDefinitions.Clear();
+
+            var constants = new List<string>(_constants);
+
+            foreach (var constant in constants)
+            {
+                UnregisterName(constant);
+                _constants.Remove(constant);
+            }
         }
 
         private void DrawMainWindow()
@@ -64,7 +156,7 @@ namespace SilverFir
 
             CommonWindow.Children.Add(outputBox);
 
-            RegisterName(RegisterNames.OUTPUT_BOX, outputBox);
+            RegisterNameCustom(RegisterNames.OUTPUT_BOX, outputBox);
 
             #endregion Output box
 
@@ -72,7 +164,11 @@ namespace SilverFir
 
             var yieldMore = new Label
             {
-                Content = _languageService.YieldMoreText,
+                Content = new TextBlock
+                {
+                    Text = _languageService.YieldMoreText,
+                    TextAlignment = _textAlignment
+                },
                 HorizontalAlignment = HorizontalAlignment.Right,
                 VerticalAlignment = VerticalAlignment.Center
             };
@@ -97,7 +193,7 @@ namespace SilverFir
 
             CommonWindow.Children.Add(yieldMoreValue);
 
-            RegisterName(RegisterNames.YIELD_MORE_VALUE, yieldMoreValue);
+            RegisterNameCustom(RegisterNames.YIELD_MORE_VALUE, yieldMoreValue);
 
             #endregion Yield more
 
@@ -105,7 +201,11 @@ namespace SilverFir
 
             var yieldLess = new Label
             {
-                Content = _languageService.YieldLessText,
+                Content = new TextBlock
+                {
+                    Text = _languageService.YieldLessText,
+                    TextAlignment = _textAlignment
+                },
                 HorizontalAlignment = HorizontalAlignment.Right,
                 VerticalAlignment = VerticalAlignment.Center
             };
@@ -130,7 +230,7 @@ namespace SilverFir
 
             CommonWindow.Children.Add(yieldLessValue);
 
-            RegisterName(RegisterNames.YIELD_LESS_VALUE, yieldLessValue);
+            RegisterNameCustom(RegisterNames.YIELD_LESS_VALUE, yieldLessValue);
 
             #endregion Yield less
 
@@ -138,8 +238,13 @@ namespace SilverFir
 
             var issueVolumeMore = new Label
             {
-                Content = _languageService.IssueVolumeMoreText,
+                Content = new TextBlock
+                {
+                    Text = _languageService.IssueVolumeMoreText,
+                    TextAlignment = _textAlignment
+                },
                 HorizontalAlignment = HorizontalAlignment.Right,
+                HorizontalContentAlignment = HorizontalAlignment.Right,
                 VerticalAlignment = VerticalAlignment.Center
             };
 
@@ -163,7 +268,7 @@ namespace SilverFir
 
             CommonWindow.Children.Add(issueVolumeMoreValue);
 
-            RegisterName(RegisterNames.ISSUE_VOLUME_MORE_VALUE, issueVolumeMoreValue);
+            RegisterNameCustom(RegisterNames.ISSUE_VOLUME_MORE_VALUE, issueVolumeMoreValue);
 
             #endregion Issue volume more
 
@@ -171,7 +276,11 @@ namespace SilverFir
 
             var daysToMaturityMore = new Label
             {
-                Content = _languageService.DaysToMaturityMoreText,
+                Content = new TextBlock
+                {
+                    Text = _languageService.DaysToMaturityMoreText,
+                    TextAlignment = _textAlignment
+                },
                 HorizontalAlignment = HorizontalAlignment.Right,
                 VerticalAlignment = VerticalAlignment.Center
             };
@@ -196,7 +305,7 @@ namespace SilverFir
 
             CommonWindow.Children.Add(daysToMaturityMoreValue);
 
-            RegisterName(RegisterNames.DAYS_TO_MATURITY_MORE_VALUE, daysToMaturityMoreValue);
+            RegisterNameCustom(RegisterNames.DAYS_TO_MATURITY_MORE_VALUE, daysToMaturityMoreValue);
 
             #endregion Days to maturity more
 
@@ -204,7 +313,11 @@ namespace SilverFir
 
             var daysToMaturityLess = new Label
             {
-                Content = _languageService.DaysToMaturityLessText,
+                Content = new TextBlock
+                {
+                    Text = _languageService.DaysToMaturityLessText,
+                    TextAlignment = _textAlignment
+                },
                 HorizontalAlignment = HorizontalAlignment.Right,
                 VerticalAlignment = VerticalAlignment.Center
             };
@@ -229,7 +342,7 @@ namespace SilverFir
 
             CommonWindow.Children.Add(daysToMaturityLessValue);
 
-            RegisterName(RegisterNames.DAYS_TO_MATURITY_LESS_VALUE, daysToMaturityLessValue);
+            RegisterNameCustom(RegisterNames.DAYS_TO_MATURITY_LESS_VALUE, daysToMaturityLessValue);
 
             #endregion Days to maturity less
 
@@ -252,7 +365,7 @@ namespace SilverFir
             getBondsButton.Click += ButtonClickAsync;
             CommonWindow.Children.Add(getBondsButton);
 
-            RegisterName(RegisterNames.GET_BONDS, getBondsButton);
+            RegisterNameCustom(RegisterNames.GET_BONDS, getBondsButton);
 
             #endregion Get bonds button
 
@@ -275,65 +388,59 @@ namespace SilverFir
             clearButton.Click += ButtonClickAsync;
             CommonWindow.Children.Add(clearButton);
 
-            RegisterName(RegisterNames.CLEAR, clearButton);
+            RegisterNameCustom(RegisterNames.CLEAR, clearButton);
 
             #endregion Clear button
+
+            #region Create update language button
+
+            var img = new Image
+            {
+                Source = new BitmapImage(new Uri(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, LANGUAGE_IMAGES_FOLDER, _imagePaths[_currentLanguage]), UriKind.RelativeOrAbsolute))
+            };
+
+            var stackPnl = new StackPanel
+            {
+                Orientation = Orientation.Horizontal
+            };
+
+            stackPnl.Children.Add(img);
+
+            var createUpdateLanguageButton = new Button
+            {
+                Content = stackPnl,
+                Height = 30,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Name = RegisterNames.UPDATE_LANGUAGE,
+                Tag = _currentLanguage,
+                VerticalAlignment = VerticalAlignment.Center,
+                Width = 30
+            };
+
+            Grid.SetRow(createUpdateLanguageButton, 6);
+            Grid.SetColumn(createUpdateLanguageButton, 0);
+
+            createUpdateLanguageButton.Click += UpdateLanguageButtonClick;
+            CommonWindow.Children.Add(createUpdateLanguageButton);
+
+            RegisterNameCustom(RegisterNames.UPDATE_LANGUAGE, createUpdateLanguageButton);
+
+            #endregion Create update language button
         }
 
-        private async void ButtonClickAsync(object sender, RoutedEventArgs e)
+        private Dictionary<string, bool> ErrorsInputParameters(InputParameters inputParameters)
         {
-            if (sender is Button senderButton && CommonWindow.FindName(RegisterNames.OUTPUT_BOX) is TextBox result)
+            var errors = new Dictionary<string, bool>
             {
-                InputParameters newInputParameters;
-
-                try
                 {
-                    newInputParameters = NewInputParameters();
-                }
-                catch (Exception ex)
+                    _languageService.IncorrectYieldValuesText, inputParameters.YieldMore > inputParameters.YieldLess
+                },
                 {
-                    result.Text = ex.Message;
-
-                    return;
+                    _languageService.IncorrectDaysToMaturityValuesText, inputParameters.DaysToMaturityMore > inputParameters.DaysToMaturityLess
                 }
+            };
 
-                switch (senderButton.Name)
-                {
-                    case RegisterNames.GET_BONDS:
-                    {
-                        SearchParameters(newInputParameters, false);
-
-                        var errors = ErrorsInputParameters(newInputParameters);
-
-                        if (!errors.Any())
-                        {
-                            try
-                            {
-                                result.Text = await SearchBondsResult(newInputParameters);
-                            }
-                            catch (Exception)
-                            {
-                                result.Text = _languageService.ConnectionErrorText;
-                            }
-                        }
-                        else
-                        {
-                            result.Text = string.Join("\n", errors);
-                        }
-
-                        break;
-                    }
-
-                    case RegisterNames.CLEAR:
-                    {
-                        result.Text = string.Empty;
-
-                        break;
-                    }
-                }
-
-                SearchParameters(newInputParameters, true);
-            }
+            return errors;
         }
 
         private InputParameters NewInputParameters()
@@ -406,6 +513,34 @@ namespace SilverFir
             return inputParameters;
         }
 
+        /// <summary>
+        ///     Регистрируем имя и добавляем имя в кэш
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="scopedElement"></param>
+        private void RegisterNameCustom(string name, object scopedElement)
+        {
+            RegisterName(name, scopedElement);
+            _constants.Add(name);
+        }
+
+        private async Task<string> SearchBondsResult(InputParameters inputParameters)
+        {
+            var bonds = await _searchBonds.MoexSearchBonds(inputParameters);
+
+            return bonds.Any()
+                ? string.Join("\n", bonds.Select(x => (x.SecId ?? string.Empty) +
+                                                      "\t   " +
+                                                      (x.BondName ?? string.Empty) +
+                                                      "\t   " +
+                                                      x.MaturityDate.ToString("dd.MM.yyyy") +
+                                                      "\t  " +
+                                                      x.BondYield +
+                                                      "\t   " +
+                                                      x.IssueVolume))
+                : _languageService.NoBondsForSelectedParametersText;
+        }
+
         private void SearchParameters(InputParameters inputParameters, bool isEnabled)
         {
             #region Доходность
@@ -465,38 +600,68 @@ namespace SilverFir
             #endregion Кнопки
         }
 
-        private List<string> ErrorsInputParameters(InputParameters inputParameters)
+        private void UpdateLanguage()
         {
-            var errors = new List<string>();
+            var languageService = _resovler(_currentLanguage);
 
-            if (inputParameters.YieldMore > inputParameters.YieldLess)
-            {
-                errors.Add(_languageService.IncorrectYieldValuesText);
-            }
-
-            if (inputParameters.DaysToMaturityMore > inputParameters.DaysToMaturityLess)
-            {
-                errors.Add(_languageService.IncorrectDaysToMaturityValuesText);
-            }
-
-            return errors;
+            _languageService = languageService ?? throw new Exception(CANNOT_LOAD_LANGUAGE);
+            _textAlignment = _currentLanguage == LanguageEnum.Hebrew ? TextAlignment.Right : TextAlignment.Left;
         }
 
-        private async Task<string> SearchBondsResult(InputParameters inputParameters)
+        private void UpdateLanguageButtonClick(object sender, RoutedEventArgs e)
         {
-            var bonds = await _searchBonds.MoexSearchBonds(inputParameters);
+            if (sender is Button button)
+            {
+                var isParsedCurrentLanguage = Enum.TryParse<LanguageEnum>(button.Tag.ToString(), out var currentLanguage);
 
-            return bonds.Any()
-                ? string.Join("\n", bonds.Select(x => (x.SecId ?? string.Empty) +
-                                                      "\t   " +
-                                                      (x.BondName ?? string.Empty) +
-                                                      "\t   " +
-                                                      x.MaturityDate.ToString("dd.MM.yyyy") +
-                                                      "\t  " +
-                                                      x.BondYield +
-                                                      "\t   " +
-                                                      x.IssueVolume))
-                : _languageService.NoBondsForSelectedParametersText;
+                if (isParsedCurrentLanguage == false)
+                {
+                    throw new Exception(CANNOT_LOAD_LANGUAGE);
+                }
+
+                var previousErrors = ErrorsInputParameters(NewInputParameters());
+
+                var allLanguages = Enum.GetValues<LanguageEnum>();
+                var currentLanguageIndex = Array.IndexOf(allLanguages, currentLanguage);
+                var nextLanguageIndex = (currentLanguageIndex + 1) % allLanguages.Length;
+
+                _currentLanguage = (LanguageEnum)nextLanguageIndex;
+                UpdateLanguage();
+
+                var inputParameters = NewInputParameters();
+                var textBoxOld = (CommonWindow.FindName(RegisterNames.OUTPUT_BOX) as TextBox)?.Text ?? string.Empty;
+
+                ChildrenClear();
+
+                DrawMainWindow();
+                SearchParameters(inputParameters, true);
+
+                if (CommonWindow.FindName(RegisterNames.OUTPUT_BOX) is TextBox textBoxNew)
+                {
+                    if (textBoxOld != string.Empty)
+                    {
+                        var errors = ErrorsInputParameters(inputParameters);
+
+                        if (errors.Any(x => x.Value))
+                        {
+                            textBoxNew.Text = string.Join("\n", errors.Where(x => x.Value).Select(x => x.Key));
+                            textBoxNew.TextAlignment = _textAlignment;
+                        }
+                        else if (previousErrors.Select(x => x.Key).Any(textBoxOld.Contains))
+                        {
+                            textBoxNew.Text = string.Empty;
+                        }
+                        else
+                        {
+                            textBoxNew.Text = textBoxOld;
+                        }
+                    }
+                    else
+                    {
+                        textBoxNew.Text = string.Empty;
+                    }
+                }
+            }
         }
     }
 }

@@ -1,11 +1,11 @@
-﻿using Newtonsoft.Json;
-using SilverFir.SearchBonds.MoexClasses;
+﻿using SilverFir.SearchBonds.MoexClasses;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace SilverFir.SearchBonds
@@ -47,7 +47,7 @@ namespace SilverFir.SearchBonds
 
                     var json = await content.ReadAsStringAsync();
 
-                    var resultBoardGroup = JsonConvert.DeserializeObject<BoardGroups>(json.Replace("\\\"", string.Empty));
+                    var resultBoardGroup = JsonSerializer.Deserialize<BoardGroups>(json.Replace("\\\"", string.Empty));
 
                     if (resultBoardGroup?.Securities?.Data is not null)
                     {
@@ -66,7 +66,7 @@ namespace SilverFir.SearchBonds
                             var bondName = data[1]?.ToString() ?? string.Empty;
 
                             // Объём выпуска
-                            var issueVolumeCount = Convert.ToInt64(data[2] ?? 0);
+                            var issueVolumeCount = Convert.ToInt64((data[2] ?? 0).ToString());
 
                             // Объём эмиссии
                             var issueVolume = INITIAL_NOMINAL_VALUE * issueVolumeCount;
@@ -75,7 +75,7 @@ namespace SilverFir.SearchBonds
                             var daysToMaturity = (maturityDate - DateTime.Today).Days;
 
                             // Доходность
-                            var bondYield = Convert.ToDecimal(data[4] ?? 0);
+                            var bondYield = Convert.ToDecimal((data[4] ?? 0).ToString());
 
                             // Состояние выпуска - в обращении
                             var releaseStatus = (data[5]?.ToString() ?? string.Empty) == SecStatus.A.ToString();
@@ -106,7 +106,11 @@ namespace SilverFir.SearchBonds
                 }
             }
 
-            return result.Values.OrderByDescending(x => x.MaturityDate).ThenBy(x => x.SecId).ToList();
+            return result
+                .Select(x => x.Value)
+                .OrderByDescending(x => x.MaturityDate)
+                .ThenBy(x => x.SecId)
+                .ToList();
         }
     }
 }
