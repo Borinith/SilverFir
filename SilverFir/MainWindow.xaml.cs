@@ -22,7 +22,7 @@ namespace SilverFir
         private const string LANGUAGE_IMAGES_FOLDER = "LanguageImages";
         private readonly HashSet<string> _constants = new();
         private readonly Dictionary<LanguageEnum, string> _imagePaths = new();
-        private readonly ProxyLanguage.ProxyLanguageResolver _resovler;
+        private readonly ProxyLanguage.ProxyLanguageResolver _resolver;
         private readonly ISearchBonds _searchBonds;
         private LanguageEnum _currentLanguage = LanguageEnum.English;
         private ILanguageService _languageService = null!;
@@ -31,9 +31,9 @@ namespace SilverFir
         /// <summary>
         ///     Main window
         /// </summary>
-        public MainWindow(ProxyLanguage.ProxyLanguageResolver resovler, ISearchBonds searchBonds)
+        public MainWindow(ProxyLanguage.ProxyLanguageResolver resolver, ISearchBonds searchBonds)
         {
-            _resovler = resovler;
+            _resolver = resolver;
             _searchBonds = searchBonds;
 
             foreach (var language in Enum.GetValues<LanguageEnum>())
@@ -602,7 +602,7 @@ namespace SilverFir
 
         private void UpdateLanguage()
         {
-            var languageService = _resovler(_currentLanguage);
+            var languageService = _resolver(_currentLanguage);
 
             _languageService = languageService ?? throw new Exception(CANNOT_LOAD_LANGUAGE);
             _textAlignment = _currentLanguage == LanguageEnum.Hebrew ? TextAlignment.Right : TextAlignment.Left;
