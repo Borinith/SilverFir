@@ -472,7 +472,7 @@ namespace SilverFir
 
             #region Объём эмиссии
 
-            var isIssueVolumeMoreParsed = int.TryParse((CommonWindow.FindName(RegisterNames.ISSUE_VOLUME_MORE_VALUE) as IntegerUpDown)?.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var issueVolumeMoreValue);
+            var isIssueVolumeMoreParsed = long.TryParse((CommonWindow.FindName(RegisterNames.ISSUE_VOLUME_MORE_VALUE) as IntegerUpDown)?.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var issueVolumeMoreValue);
 
             if (!isIssueVolumeMoreParsed)
             {

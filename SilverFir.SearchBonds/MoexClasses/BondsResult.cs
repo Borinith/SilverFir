@@ -2,36 +2,20 @@
 
 namespace SilverFir.SearchBonds.MoexClasses
 {
-    public record BondsResult
-    {
-        /// <summary>
-        ///     Наименование
-        /// </summary>
-        public string? BondName { get; init; }
-
-        /// <summary>
-        ///     Доходность
-        /// </summary>
-        public decimal BondYield { get; init; }
-
-        /// <summary>
-        ///     Объём эмиссии
-        /// </summary>
-        public decimal IssueVolume { get; init; }
-
-        /// <summary>
-        ///     Дата погашения
-        /// </summary>
-        public DateTime MaturityDate { get; init; }
-
-        /// <summary>
-        ///     Состояние выпуска
-        /// </summary>
-        public bool ReleaseStatus { get; init; }
-
-        /// <summary>
-        ///     Код ценной бумаги
-        /// </summary>
-        public string? SecId { get; init; }
-    }
+    /// <summary>
+    ///     Ценная бумага
+    /// </summary>
+    /// <param name="BondName">Наименование</param>
+    /// <param name="BondYield">Доходность</param>
+    /// <param name="IssueVolume">Объём эмиссии</param>
+    /// <param name="MaturityDate">Дата погашения</param>
+    /// <param name="ReleaseStatus">Состояние выпуска</param>
+    /// <param name="SecId">Код ценной бумаги</param>
+    public record struct BondResult(
+        string? BondName,
+        decimal BondYield,
+        long IssueVolume,
+        DateTime MaturityDate,
+        bool ReleaseStatus,
+        string? SecId);
 }

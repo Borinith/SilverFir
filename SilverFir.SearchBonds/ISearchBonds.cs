@@ -6,6 +6,6 @@ namespace SilverFir.SearchBonds
 {
     public interface ISearchBonds
     {
-        Task<List<BondsResult>> MoexSearchBonds(InputParameters inputParameters);
+        Task<List<BondResult>> MoexSearchBonds(InputParameters inputParameters);
     }
 }

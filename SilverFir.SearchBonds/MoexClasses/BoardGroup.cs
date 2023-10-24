@@ -2,7 +2,7 @@
 
 namespace SilverFir.SearchBonds.MoexClasses
 {
-    public record BoardGroups
+    public record BoardGroup
     {
         [JsonPropertyName("securities")]
         public Security? Securities { get; init; }

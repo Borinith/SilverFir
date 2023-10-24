@@ -15,7 +15,7 @@
         /// <summary>
         ///     Объём эмиссии больше этой цифры
         /// </summary>
-        public decimal IssueVolumeMore { get; set; } = 2_000_000_000;
+        public long IssueVolumeMore { get; set; } = 2_000_000_000;
 
         /// <summary>
         ///     Дней до погашения больше этой цифры
