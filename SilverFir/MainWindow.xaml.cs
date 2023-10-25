@@ -85,11 +85,13 @@ namespace SilverFir
                             catch (Exception)
                             {
                                 result.Text = _languageService.ConnectionErrorText;
+                                result.TextAlignment = _textAlignment;
                             }
                         }
                         else
                         {
                             result.Text = string.Join("\n", errors.Where(x => x.Value).Select(x => x.Key));
+                            result.TextAlignment = _textAlignment;
                         }
 
                         break;
@@ -624,7 +626,9 @@ namespace SilverFir
                     throw new Exception(CANNOT_LOAD_LANGUAGE);
                 }
 
-                var previousErrors = ErrorsInputParameters(NewInputParameters());
+                var previousErrorsInput = ErrorsInputParameters(NewInputParameters());
+                var noBondsOld = _languageService.NoBondsForSelectedParametersText;
+                var connectionErrorOld = _languageService.ConnectionErrorText;
 
                 var allLanguages = Enum.GetValues<LanguageEnum>();
                 var currentLanguageIndex = Array.IndexOf(allLanguages, currentLanguage);
@@ -632,6 +636,16 @@ namespace SilverFir
 
                 _currentLanguage = (LanguageEnum)nextLanguageIndex;
                 UpdateLanguage();
+
+                var previousErrorsSearchBonds = new Dictionary<string, string>
+                {
+                    {
+                        noBondsOld, _languageService.NoBondsForSelectedParametersText
+                    },
+                    {
+                        connectionErrorOld, _languageService.ConnectionErrorText
+                    }
+                };
 
                 var inputParameters = NewInputParameters();
                 var textBoxOld = (CommonWindow.FindName(RegisterNames.OUTPUT_BOX) as TextBox)?.Text ?? string.Empty;
@@ -652,9 +666,14 @@ namespace SilverFir
                             textBoxNew.Text = string.Join("\n", errors.Where(x => x.Value).Select(x => x.Key));
                             textBoxNew.TextAlignment = _textAlignment;
                         }
-                        else if (previousErrors.Select(x => x.Key).Any(textBoxOld.Contains))
+                        else if (previousErrorsInput.Select(x => x.Key).Any(textBoxOld.Contains))
                         {
                             textBoxNew.Text = string.Empty;
+                        }
+                        else if (previousErrorsSearchBonds.TryGetValue(textBoxOld, out var errorSearchBonds))
+                        {
+                            textBoxNew.Text = errorSearchBonds;
+                            textBoxNew.TextAlignment = _textAlignment;
                         }
                         else
                         {
