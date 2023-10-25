@@ -80,7 +80,10 @@ namespace SilverFir
                             try
                             {
                                 result.Text = await SearchBondsResult(newInputParameters);
-                                result.TextAlignment = TextAlignment.Left;
+
+                                result.TextAlignment = result.Text == _languageService.NoBondsForSelectedParametersText
+                                    ? _textAlignment
+                                    : TextAlignment.Left;
                             }
                             catch (Exception)
                             {
