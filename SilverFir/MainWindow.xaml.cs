@@ -597,6 +597,11 @@ namespace SilverFir
                 clearButton.IsEnabled = isEnabled;
             }
 
+            if (CommonWindow.FindName(RegisterNames.UPDATE_LANGUAGE) is Button updateLanguageButton)
+            {
+                updateLanguageButton.IsEnabled = isEnabled;
+            }
+
             #endregion Кнопки
         }
 
