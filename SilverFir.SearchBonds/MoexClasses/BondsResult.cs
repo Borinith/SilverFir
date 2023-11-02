@@ -11,7 +11,7 @@ namespace SilverFir.SearchBonds.MoexClasses
     /// <param name="MaturityDate">Дата погашения</param>
     /// <param name="ReleaseStatus">Состояние выпуска</param>
     /// <param name="SecId">Код ценной бумаги</param>
-    public record struct BondResult(
+    public readonly record struct BondResult(
         string? BondName,
         decimal BondYield,
         long IssueVolume,
