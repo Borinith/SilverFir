@@ -23,8 +23,8 @@ namespace SilverFir.SearchBonds
         /// </summary>
         public async Task<List<BondResult>> MoexSearchBonds(InputParameters inputParameters)
         {
-            var bondResults = new ConcurrentDictionary<string, BondResult>();
             var boardgroupResults = new ConcurrentDictionary<int, BoardGroup?>();
+            var bondResults = new ConcurrentDictionary<string, BondResult>();
 
             var boardgroupIds = new[]
             {
@@ -54,54 +54,52 @@ namespace SilverFir.SearchBonds
                 }
             });
 
-            foreach (var boardgroupResult in boardgroupResults.Select(x => x.Value))
+            var allData = boardgroupResults
+                .Where(x => x.Value?.Securities?.Data != null)
+                .SelectMany(x => x.Value!.Securities!.Data!);
+
+            Parallel.ForEach(allData, data =>
             {
-                if (boardgroupResult?.Securities?.Data is not null)
+                // Дата погашения
+                if (!DateTime.TryParse(data[3]?.ToString() ?? string.Empty, out var maturityDate))
                 {
-                    Parallel.ForEach(boardgroupResult.Securities.Data, data =>
-                    {
-                        // Дата погашения
-                        if (!DateTime.TryParse(data[3]?.ToString() ?? string.Empty, out var maturityDate))
-                        {
-                            return;
-                        }
-
-                        // Код ценной бумаги
-                        var secId = data[0]?.ToString() ?? string.Empty;
-
-                        // Наименование
-                        var bondName = data[1]?.ToString() ?? string.Empty;
-
-                        // Объём выпуска
-                        var issueVolumeCount = Convert.ToInt64((data[2] ?? 0).ToString());
-
-                        // Объём эмиссии
-                        var issueVolume = INITIAL_NOMINAL_VALUE * issueVolumeCount;
-
-                        // Дней до погашения
-                        var daysToMaturity = (maturityDate - DateTime.Today).TotalDays;
-
-                        // Доходность
-                        var bondYield = Convert.ToDecimal((data[4] ?? 0).ToString());
-
-                        // Состояние выпуска - в обращении
-                        var releaseStatus = (data[5]?.ToString() ?? string.Empty) == SecStatus.A.ToString();
-
-                        // Условия выборки
-                        if (bondYield >= inputParameters.YieldMore &&
-                            bondYield <= inputParameters.YieldLess &&
-                            issueVolume >= inputParameters.IssueVolumeMore &&
-                            daysToMaturity >= inputParameters.DaysToMaturityMore &&
-                            daysToMaturity <= inputParameters.DaysToMaturityLess &&
-                            releaseStatus
-                           )
-                        {
-                            var bond = new BondResult(bondName, bondYield, issueVolume, maturityDate, releaseStatus, secId);
-                            bondResults.TryAdd(secId, bond);
-                        }
-                    });
+                    return;
                 }
-            }
+
+                // Код ценной бумаги
+                var secId = data[0]?.ToString() ?? string.Empty;
+
+                // Наименование
+                var bondName = data[1]?.ToString() ?? string.Empty;
+
+                // Объём выпуска
+                var issueVolumeCount = Convert.ToInt64((data[2] ?? 0).ToString());
+
+                // Объём эмиссии
+                var issueVolume = INITIAL_NOMINAL_VALUE * issueVolumeCount;
+
+                // Дней до погашения
+                var daysToMaturity = (maturityDate - DateTime.Today).TotalDays;
+
+                // Доходность
+                var bondYield = Convert.ToDecimal((data[4] ?? 0).ToString());
+
+                // Состояние выпуска - в обращении
+                var releaseStatus = (data[5]?.ToString() ?? string.Empty) == SecStatus.A.ToString();
+
+                // Условия выборки
+                if (bondYield >= inputParameters.YieldMore &&
+                    bondYield <= inputParameters.YieldLess &&
+                    issueVolume >= inputParameters.IssueVolumeMore &&
+                    daysToMaturity >= inputParameters.DaysToMaturityMore &&
+                    daysToMaturity <= inputParameters.DaysToMaturityLess &&
+                    releaseStatus
+                   )
+                {
+                    var bond = new BondResult(bondName, bondYield, issueVolume, maturityDate, releaseStatus, secId);
+                    bondResults.TryAdd(secId, bond);
+                }
+            });
 
             return bondResults
                 .Select(x => x.Value)

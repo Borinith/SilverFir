@@ -1,6 +1,7 @@
 ﻿using SilverFir.LanguageService;
 using SilverFir.SearchBonds;
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -20,8 +21,8 @@ namespace SilverFir
     {
         private const string CANNOT_LOAD_LANGUAGE = "Cannot load language";
         private const string LANGUAGE_IMAGES_FOLDER = "LanguageImages";
-        private readonly HashSet<string> _constants = new();
-        private readonly Dictionary<LanguageEnum, string> _imagePaths = new();
+        private readonly HashSet<string> _constants = new(9);
+        private readonly FrozenDictionary<LanguageEnum, string> _imagePaths;
         private readonly ProxyLanguage.ProxyLanguageResolver _resolver;
         private readonly ISearchBonds _searchBonds;
         private LanguageEnum _currentLanguage = LanguageEnum.English;
@@ -36,10 +37,7 @@ namespace SilverFir
             _resolver = resolver;
             _searchBonds = searchBonds;
 
-            foreach (var language in Enum.GetValues<LanguageEnum>())
-            {
-                _imagePaths.Add(language, $"{language}.png");
-            }
+            _imagePaths = Enum.GetValues<LanguageEnum>().ToFrozenDictionary(language => language, language => $"{language}.png");
 
             UpdateLanguage();
 
