@@ -5,7 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text.Json;
+using System.Net.Http.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SilverFir.SearchBonds
@@ -33,26 +34,25 @@ namespace SilverFir.SearchBonds
                 193 // Т+: Основной режим (USD) - безадрес.
             };
 
-            await Parallel.ForEachAsync(boardgroupIds, async (boardgroupId, token) =>
+            using (var cts = new CancellationTokenSource())
             {
-                var url = $"https://iss.moex.com/iss/engines/stock/markets/bonds/boardgroups/{boardgroupId}/securities.json?iss.dp=comma&iss.meta=off&iss.only=securities&securities.columns=SECID,SHORTNAME,ISSUESIZEPLACED,MATDATE,COUPONPERCENT,STATUS";
-
-                using (var client = new HttpClient())
-                using (var response = await client.GetAsync(url, token))
-                using (var content = response.Content)
+                await Parallel.ForEachAsync(boardgroupIds, cts.Token, async (boardgroupId, token) =>
                 {
-                    if (response.StatusCode != HttpStatusCode.OK)
+                    var url = $"https://iss.moex.com/iss/engines/stock/markets/bonds/boardgroups/{boardgroupId}/securities.json?iss.dp=comma&iss.meta=off&iss.only=securities&securities.columns=SECID,SHORTNAME,ISSUESIZEPLACED,MATDATE,COUPONPERCENT,STATUS";
+
+                    using (var client = new HttpClient())
+                    using (var response = await client.GetAsync(url, token))
                     {
-                        throw new Exception();
+                        if (response.StatusCode != HttpStatusCode.OK)
+                        {
+                            await cts.CancelAsync();
+                        }
+
+                        var boardGroup = await response.Content.ReadFromJsonAsync<BoardGroup>(token);
+                        boardgroupResults.TryAdd(boardgroupId, boardGroup);
                     }
-
-                    var json = await content.ReadAsStringAsync(token);
-
-                    var boardGroup = JsonSerializer.Deserialize<BoardGroup>(json.Replace("\\\"", string.Empty));
-
-                    boardgroupResults.TryAdd(boardgroupId, boardGroup);
-                }
-            });
+                });
+            }
 
             var allData = boardgroupResults
                 .Where(x => x.Value?.Securities?.Data != null)
