@@ -18,7 +18,6 @@ namespace SilverFir
                        {
                            services.AddSingleton<App>();
                            services.AddSingleton<MainWindow>();
-                           services.AddSingleton<ISearchBonds, SearchBonds.SearchBonds>();
 
                            services.AddSingleton<EngLanguageService>();
                            services.AddSingleton<RusLanguageService>();
@@ -34,6 +33,9 @@ namespace SilverFir
                                    _ => null
                                };
                            });
+
+                           services.AddHttpClient();
+                           services.AddSingleton<ISearchBonds, SearchBonds.SearchBonds>();
                        })
                        .Build())
             {

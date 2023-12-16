@@ -19,6 +19,13 @@ namespace SilverFir.SearchBonds
         // Первоначальная номинальная стоимость
         private const int INITIAL_NOMINAL_VALUE = 1000;
 
+        private readonly IHttpClientFactory _httpClientFactory;
+
+        public SearchBonds(IHttpClientFactory httpClientFactory)
+        {
+            _httpClientFactory = httpClientFactory;
+        }
+
         /// <summary>
         ///     Поиск облигаций по параметрам
         /// </summary>
@@ -35,12 +42,12 @@ namespace SilverFir.SearchBonds
             };
 
             using (var cts = new CancellationTokenSource())
+            using (var client = _httpClientFactory.CreateClient())
             {
                 await Parallel.ForEachAsync(boardgroupIds, cts.Token, async (boardgroupId, token) =>
                 {
                     var url = $"https://iss.moex.com/iss/engines/stock/markets/bonds/boardgroups/{boardgroupId}/securities.json?iss.dp=comma&iss.meta=off&iss.only=securities&securities.columns=SECID,SHORTNAME,ISSUESIZEPLACED,MATDATE,COUPONPERCENT,STATUS";
 
-                    using (var client = new HttpClient())
                     using (var response = await client.GetAsync(url, token))
                     {
                         if (response.StatusCode != HttpStatusCode.OK)
@@ -106,6 +113,15 @@ namespace SilverFir.SearchBonds
                 .OrderByDescending(x => x.MaturityDate)
                 .ThenBy(x => x.SecId)
                 .ToList();
+        }
+
+        public async Task<HttpStatusCode> Ping(string url)
+        {
+            using (var client = _httpClientFactory.CreateClient())
+            using (var response = await client.GetAsync(url))
+            {
+                return response.StatusCode;
+            }
         }
     }
 }

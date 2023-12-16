@@ -1,6 +1,5 @@
 using SilverFir.SearchBonds;
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -19,12 +18,9 @@ namespace SilverFir.Tests
         public async Task PingTest()
         {
             const string url = "https://iss.moex.com/iss/engines";
+            var statusCode = await _searchBonds.Ping(url);
 
-            using (var client = new HttpClient())
-            using (var response = await client.GetAsync(url))
-            {
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            }
+            Assert.Equal(HttpStatusCode.OK, statusCode);
         }
 
         [Fact]

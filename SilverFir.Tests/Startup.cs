@@ -7,6 +7,7 @@ namespace SilverFir.Tests
     {
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpClient();
             services.AddTransient<ISearchBonds, SearchBonds.SearchBonds>();
         }
     }
