@@ -8,6 +8,7 @@
         public const string GET_BONDS = "GetBonds";
         public const string ISSUE_VOLUME_MORE_VALUE = "IssueVolumeMoreValue";
         public const string OUTPUT_BOX = "OutputBox";
+        public const string START_DATE_MOEX_MORE_VALUE = "StartDateMoexMoreValue";
         public const string UPDATE_LANGUAGE = "UpdateLanguage";
         public const string YIELD_LESS_VALUE = "YieldLessValue";
         public const string YIELD_MORE_VALUE = "YieldMoreValue";

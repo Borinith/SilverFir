@@ -188,7 +188,7 @@ namespace SilverFir
                 Minimum = 0,
                 Name = RegisterNames.YIELD_MORE_VALUE,
                 VerticalAlignment = VerticalAlignment.Center,
-                Width = 90
+                Width = 100
             };
 
             Grid.SetRow(yieldMoreValue, 0);
@@ -225,7 +225,7 @@ namespace SilverFir
                 Minimum = 0,
                 Name = RegisterNames.YIELD_LESS_VALUE,
                 VerticalAlignment = VerticalAlignment.Center,
-                Width = 90
+                Width = 100
             };
 
             Grid.SetRow(yieldLessValue, 0);
@@ -263,7 +263,7 @@ namespace SilverFir
                 Minimum = 0,
                 Name = RegisterNames.ISSUE_VOLUME_MORE_VALUE,
                 VerticalAlignment = VerticalAlignment.Center,
-                Width = 90
+                Width = 100
             };
 
             Grid.SetRow(issueVolumeMoreValue, 0);
@@ -300,7 +300,7 @@ namespace SilverFir
                 Minimum = 0,
                 Name = RegisterNames.DAYS_TO_MATURITY_MORE_VALUE,
                 VerticalAlignment = VerticalAlignment.Center,
-                Width = 90
+                Width = 100
             };
 
             Grid.SetRow(daysToMaturityMoreValue, 1);
@@ -337,7 +337,7 @@ namespace SilverFir
                 Minimum = 0,
                 Name = RegisterNames.DAYS_TO_MATURITY_LESS_VALUE,
                 VerticalAlignment = VerticalAlignment.Center,
-                Width = 90
+                Width = 100
             };
 
             Grid.SetRow(daysToMaturityLessValue, 1);
@@ -348,6 +348,43 @@ namespace SilverFir
             RegisterNameCustom(RegisterNames.DAYS_TO_MATURITY_LESS_VALUE, daysToMaturityLessValue);
 
             #endregion Days to maturity less
+
+            #region Date of listing more
+
+            var startDateMoexMore = new Label
+            {
+                Content = new TextBlock
+                {
+                    Text = _languageService.StartDateMoexMoreText,
+                    TextAlignment = _textAlignment
+                },
+                HorizontalAlignment = HorizontalAlignment.Right,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+
+            Grid.SetRow(startDateMoexMore, 1);
+            Grid.SetColumn(startDateMoexMore, 4);
+
+            CommonWindow.Children.Add(startDateMoexMore);
+
+            var startDateMoexMoreValue = new DatePicker
+            {
+                DisplayDateStart = new DateTime(2000, 1, 1),
+                FirstDayOfWeek = DayOfWeek.Monday,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Name = RegisterNames.START_DATE_MOEX_MORE_VALUE,
+                VerticalAlignment = VerticalAlignment.Center,
+                Width = 100
+            };
+
+            Grid.SetRow(startDateMoexMoreValue, 1);
+            Grid.SetColumn(startDateMoexMoreValue, 5);
+
+            CommonWindow.Children.Add(startDateMoexMoreValue);
+
+            RegisterNameCustom(RegisterNames.START_DATE_MOEX_MORE_VALUE, startDateMoexMoreValue);
+
+            #endregion Date of listing more
 
             #region Get bonds button
 
@@ -440,6 +477,9 @@ namespace SilverFir
                 },
                 {
                     _languageService.IncorrectDaysToMaturityValuesText, inputParameters.DaysToMaturityMore > inputParameters.DaysToMaturityLess
+                },
+                {
+                    _languageService.IncorrectStartDateMoexText, inputParameters.StartDateMoexMore > DateTime.Today
                 }
             };
 
@@ -507,6 +547,22 @@ namespace SilverFir
             inputParameters.DaysToMaturityLess = daysToMaturityLessValue;
 
             #endregion Количество дней до погашения
+
+            #region Дата начала торгов
+
+            var startDateMoexMoreParsed = (CommonWindow.FindName(RegisterNames.START_DATE_MOEX_MORE_VALUE) as DatePicker)?.SelectedDate;
+
+            if (startDateMoexMoreParsed is null || startDateMoexMoreParsed == new DateTime(1, 1, 1))
+            {
+                errors.Add(_languageService.StartDateMoexMoreParsingErrorText);
+                inputParameters.StartDateMoexMore = new DateTime(2000, 1, 1);
+            }
+            else
+            {
+                inputParameters.StartDateMoexMore = startDateMoexMoreParsed.Value;
+            }
+
+            #endregion Дата начала торгов
 
             if (errors.Any())
             {
@@ -587,6 +643,17 @@ namespace SilverFir
             }
 
             #endregion Количество дней до погашения
+
+            #region Дата начала торгов
+
+            if (CommonWindow.FindName(RegisterNames.START_DATE_MOEX_MORE_VALUE) is DatePicker startDateMoexMoreValue)
+            {
+                startDateMoexMoreValue.DisplayDate = inputParameters.StartDateMoexMore;
+                startDateMoexMoreValue.SelectedDate = inputParameters.StartDateMoexMore;
+                startDateMoexMoreValue.IsEnabled = isEnabled;
+            }
+
+            # endregion Дата начала торгов
 
             #region Кнопки
 

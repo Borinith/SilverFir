@@ -28,8 +28,8 @@ namespace SilverFir.Tests
         {
             var inputParameters = new InputParameters
             {
-                YieldMore = 8,
-                YieldLess = 12
+                YieldMore = 15,
+                YieldLess = 25
             };
 
             var bonds = await _searchBonds.MoexSearchBonds(inputParameters);
@@ -42,8 +42,8 @@ namespace SilverFir.Tests
         {
             var inputParameters = new InputParameters
             {
-                YieldMore = 12,
-                YieldLess = 8
+                YieldMore = 25,
+                YieldLess = 15
             };
 
             var bonds = await _searchBonds.MoexSearchBonds(inputParameters);

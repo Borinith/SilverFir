@@ -31,7 +31,7 @@ namespace SilverFir.SearchBonds
         /// </summary>
         public async Task<List<BondResult>> MoexSearchBonds(InputParameters inputParameters)
         {
-            var boardgroupResults = new ConcurrentDictionary<int, BoardGroup?>();
+            var boardgroupResults = new ConcurrentDictionary<int, Content?>();
             var bondResults = new ConcurrentDictionary<string, BondResult>();
 
             var boardgroupIds = new[]
@@ -46,17 +46,17 @@ namespace SilverFir.SearchBonds
             {
                 await Parallel.ForEachAsync(boardgroupIds, cts.Token, async (boardgroupId, token) =>
                 {
-                    var url = $"https://iss.moex.com/iss/engines/stock/markets/bonds/boardgroups/{boardgroupId}/securities.json?iss.dp=comma&iss.meta=off&iss.only=securities&securities.columns=SECID,SHORTNAME,ISSUESIZEPLACED,MATDATE,COUPONPERCENT,STATUS";
+                    var urlSecurities = $"https://iss.moex.com/iss/engines/stock/markets/bonds/boardgroups/{boardgroupId}/securities.json?iss.dp=comma&iss.meta=off&iss.only=securities&securities.columns=SECID,SHORTNAME,ISSUESIZEPLACED,MATDATE,COUPONPERCENT,STATUS";
 
-                    using (var response = await client.GetAsync(url, token))
+                    using (var response = await client.GetAsync(urlSecurities, token))
                     {
                         if (response.StatusCode != HttpStatusCode.OK)
                         {
                             await cts.CancelAsync();
                         }
 
-                        var boardGroup = await response.Content.ReadFromJsonAsync<BoardGroup>(token);
-                        boardgroupResults.TryAdd(boardgroupId, boardGroup);
+                        var content = await response.Content.ReadFromJsonAsync<Content>(token);
+                        boardgroupResults.TryAdd(boardgroupId, content);
                     }
                 });
             }
@@ -103,14 +103,18 @@ namespace SilverFir.SearchBonds
                     releaseStatus
                    )
                 {
-                    var bond = new BondResult(bondName, bondYield, issueVolume, maturityDate, releaseStatus, secId);
+                    var bond = new BondResult(bondName, bondYield, issueVolume, maturityDate, secId);
+
+                    // ReSharper disable once AccessToModifiedClosure
                     bondResults.TryAdd(secId, bond);
                 }
             });
 
+            bondResults = await MoexDescriptionFilter(bondResults, inputParameters.StartDateMoexMore);
+
             return bondResults
                 .Select(x => x.Value)
-                .OrderByDescending(x => x.MaturityDate)
+                .OrderByDescending(x => x.BondYield)
                 .ThenBy(x => x.SecId)
                 .ToList();
         }
@@ -121,6 +125,68 @@ namespace SilverFir.SearchBonds
             using (var response = await client.GetAsync(url))
             {
                 return response.StatusCode;
+            }
+        }
+
+        private async Task<ConcurrentDictionary<string, BondResult>> MoexDescriptionFilter(ConcurrentDictionary<string, BondResult> bonds, DateTime startDateMoexMore)
+        {
+            if (bonds.IsEmpty)
+            {
+                return bonds;
+            }
+
+            const string startDateMoex = "STARTDATEMOEX";
+            const string isQualifiedInvestors = "ISQUALIFIEDINVESTORS";
+
+            var bondsFilter = new ConcurrentDictionary<string, BondResult>();
+
+            using (var cts = new CancellationTokenSource())
+            using (var client = _httpClientFactory.CreateClient())
+            {
+                await Parallel.ForEachAsync(bonds.Keys, cts.Token, async (bondId, token) =>
+                {
+                    var urlDescription = $"https://iss.moex.com/iss/securities/{bondId}.json?iss.dp=comma?iss.meta=off&iss.only=description&description.columns=name,value";
+
+                    using (var response = await client.GetAsync(urlDescription, token))
+                    {
+                        if (response.StatusCode != HttpStatusCode.OK)
+                        {
+                            await cts.CancelAsync();
+                        }
+
+                        var content = await response.Content.ReadFromJsonAsync<Content>(token);
+
+                        if (content?.Description?.Data is not null)
+                        {
+                            // Дата начала торгов
+                            var startDateMoexRaw = content.Description.Data.FirstOrDefault(x => x[0]?.ToString() == startDateMoex)?[1]?.ToString() ?? string.Empty;
+
+                            if (!DateTime.TryParse(startDateMoexRaw, out var startDate))
+                            {
+                                return;
+                            }
+
+                            // Новая облигация?
+                            var isNewBond = startDate > startDateMoexMore;
+
+                            if (!isNewBond)
+                            {
+                                return;
+                            }
+
+                            // Неквалифицированный инвестор?
+                            var isQualifiedInvestorsRaw = content.Description.Data.FirstOrDefault(x => x[0]?.ToString() == isQualifiedInvestors)?[1]?.ToString() ?? string.Empty;
+                            var isUnqualifiedInvestor = isQualifiedInvestorsRaw == "0";
+
+                            if (isUnqualifiedInvestor)
+                            {
+                                bondsFilter.TryAdd(bondId, bonds[bondId]);
+                            }
+                        }
+                    }
+                });
+
+                return bondsFilter;
             }
         }
     }

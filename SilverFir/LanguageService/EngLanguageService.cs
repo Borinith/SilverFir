@@ -18,6 +18,8 @@
 
         public string IncorrectDaysToMaturityValuesText => "Incorrect days to maturity values";
 
+        public string IncorrectStartDateMoexText => "The date of listing must be greater than the current day";
+
         public string IncorrectYieldValuesText => "Incorrect yield values";
 
         public string IssueVolumeMoreParsingErrorText => "Parsing error of \"Issue volume is more than\" value";
@@ -25,6 +27,10 @@
         public string IssueVolumeMoreText => "Issue volume is\nmore than:";
 
         public string NoBondsForSelectedParametersText => "No bonds for selected parameters";
+
+        public string StartDateMoexMoreParsingErrorText => "Parsing error of \nDate of listing more than\n";
+
+        public string StartDateMoexMoreText => "Date of listing\nmore than:";
 
         public string YieldLessParsingErrorText => "Parsing error of \"Yield is less than\" value";
 

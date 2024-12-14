@@ -18,13 +18,19 @@
 
         public string IncorrectDaysToMaturityValuesText => "Неверные значения количества дней до погашения";
 
+        public string IncorrectStartDateMoexText => "Дата начала торгов должна быть больше текущего дня";
+
         public string IncorrectYieldValuesText => "Неверные значения доходности";
 
         public string IssueVolumeMoreParsingErrorText => "Ошибка парсинга значения \"Объём эмиссии больше, чем\"";
 
-        public string IssueVolumeMoreText => "Объём\nэмиссии\nбольше, чем:";
+        public string IssueVolumeMoreText => "Объём эмиссии\nбольше, чем:";
 
         public string NoBondsForSelectedParametersText => "Нет облигаций для выбранных параметров";
+
+        public string StartDateMoexMoreParsingErrorText => "Ошибка парсинга значения \nДата начала торгов больше, чем\n";
+
+        public string StartDateMoexMoreText => "Дата начала торгов\nбольше, чем:";
 
         public string YieldLessParsingErrorText => "Ошибка парсинга значения \"Доходность меньше, чем\"";
 

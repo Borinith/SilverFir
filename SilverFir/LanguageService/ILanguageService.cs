@@ -18,6 +18,8 @@
 
         string IncorrectDaysToMaturityValuesText { get; }
 
+        string IncorrectStartDateMoexText { get; }
+
         string IncorrectYieldValuesText { get; }
 
         string IssueVolumeMoreParsingErrorText { get; }
@@ -25,6 +27,10 @@
         string IssueVolumeMoreText { get; }
 
         string NoBondsForSelectedParametersText { get; }
+
+        string StartDateMoexMoreParsingErrorText { get; }
+
+        string StartDateMoexMoreText { get; }
 
         string YieldLessParsingErrorText { get; }
 

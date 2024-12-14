@@ -9,13 +9,11 @@ namespace SilverFir.SearchBonds.MoexClasses
     /// <param name="BondYield">Доходность</param>
     /// <param name="IssueVolume">Объём эмиссии</param>
     /// <param name="MaturityDate">Дата погашения</param>
-    /// <param name="ReleaseStatus">Состояние выпуска</param>
     /// <param name="SecId">Код ценной бумаги</param>
     public readonly record struct BondResult(
         string? BondName,
         decimal BondYield,
         long IssueVolume,
         DateTime MaturityDate,
-        bool ReleaseStatus,
         string? SecId);
 }
