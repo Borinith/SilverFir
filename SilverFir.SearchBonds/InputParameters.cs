@@ -5,17 +5,17 @@ namespace SilverFir.SearchBonds
     public class InputParameters
     {
         /// <summary>
-        ///     Доходность больше или равна этой цифре
+        ///     Доходность больше или равна этого значения
         /// </summary>
         public decimal YieldMore { get; set; } = 15;
 
         /// <summary>
-        ///     Доходность меньше или равна этой цифре
+        ///     Доходность меньше или равна этого значения
         /// </summary>
         public decimal YieldLess { get; set; } = 25;
 
         /// <summary>
-        ///     Объём эмиссии больше или равен этой цифре
+        ///     Объём эмиссии больше или равен этого значения
         /// </summary>
         public long IssueVolumeMore { get; set; } = 2_000_000_000;
 
